@@ -6,12 +6,23 @@
 //
 
 /// Format logique de pixel (sous-ensemble des formats utilisés par Deskew).
-public enum PixelFormat: Sendable {
+public enum PixelFormat: Equatable, Sendable {
     case binary   // 1 bit
     case index8   // 1 octet + palette
     case gray8    // 1 octet
     case rgb24    // 3 octets
     case rgba32   // 4 octets
+
+    /// Nom affiché (équivalent de `GetFormatName` pour les formats supportés).
+    public var name: String {
+        switch self {
+        case .binary: return "Binary"
+        case .index8: return "Index8"
+        case .gray8: return "Gray8"
+        case .rgb24: return "R8G8B8"
+        case .rgba32: return "A8R8G8B8"
+        }
+    }
 }
 
 /// Couleur 24 bits, ordre mémoire R, G, B.
