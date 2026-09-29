@@ -27,10 +27,11 @@ L'objectif est de **reproduire fidèlement les algorithmes** du projet original
 | ----- | ---- |
 | Analyse du code Pascal et documentation de réimplémentation | ✅ |
 | Oracle v1.33 compilé + golden files de parité | ✅ |
-| Squelette du package Swift | ⬜ à faire |
-| Algorithmes (Otsu, binarisation, rotation, Hough) | ⬜ à faire |
-| Entrées-sorties ImageIO | ⬜ à faire |
-| Multithreading et optimisation | ⬜ à faire |
+| Squelette du package Swift | ✅ |
+| Algorithmes (Otsu, binarisation, rotation, Hough) | ✅ |
+| Entrées-sorties ImageIO | ✅ |
+| Pipeline et exécutable CLI | ✅ |
+| Multithreading et optimisation | 🟡 en cours |
 
 Suivi détaillé des tâches restantes : [`TODO.md`](TODO.md).
 
