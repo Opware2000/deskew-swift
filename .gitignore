@@ -25,3 +25,6 @@ deskew.cfg
 *.res
 *.stat
 
+# Logs locaux (outils de développement)
+logs/
+
