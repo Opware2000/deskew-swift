@@ -5,6 +5,8 @@
 //  Travail dérivé de Deskew (MPL 2.0).
 //
 
+import Foundation
+
 /// Opérations de chemin reproduisant `GetFileName`, `GetFileDir`,
 /// `EnsureTrailingPathDelimiter`, `ChangeFileExt` et `GetFileExt`.
 public enum FilePath {
@@ -48,5 +50,10 @@ public enum FilePath {
             return ext
         }
         return ""
+    }
+
+    /// Équivalent de `ExpandFileName` : chemin absolu normalisé.
+    public static func expandFileName(_ path: String) -> String {
+        URL(fileURLWithPath: path).standardizedFileURL.path
     }
 }

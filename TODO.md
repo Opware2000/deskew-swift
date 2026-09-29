@@ -99,7 +99,7 @@ Liste des tâches, dérivée de
 - [x] Exécutable `deskew` (bannière, journal, codes de sortie)
 - [x] Test de parité des images de sortie (rotation)
 - [x] Faire passer les **37 golden cases** (13 détection + 24 rotation)
-- [ ] Parité stricte de la sortie console (bannière, `-s p`)
+- [x] Parité stricte de la sortie console (bannière, `-s p`, stats, formats)
 - [x] Compression binaire réelle (`-f b1`, G4, `tinput`)
 
 ## Phase 8 — Multithreading et performance

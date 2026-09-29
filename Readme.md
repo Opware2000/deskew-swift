@@ -86,6 +86,8 @@ xcrun swift test -c release
 ```
 
 Options identiques à l'original (`-o -a -b -q -d -t -m -r -f -p -l -g -s -c`).
+La sortie console (bannière, messages, statistiques, noms de format) reproduit
+celle de Deskew 1.33 : l'outil est utilisable en **remplacement direct**.
 
 > Les tests en mode debug sont lents (cas de stress `cubic` sur une grande image) :
 > privilégier `swift test -c release`.

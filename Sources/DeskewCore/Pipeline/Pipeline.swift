@@ -30,6 +30,8 @@ public struct PipelineResult {
     public var log: [String]
     /// Compression TIFF effective (après résolution de `input`).
     public var resolvedTiffCompression: TiffCompression?
+    /// Format de sortie effectif (pour l'affichage console).
+    public var resolvedOutputFormat: PixelFormat?
 }
 
 /// Orchestration du traitement (équivalent de `DoDeskew`).
@@ -37,7 +39,8 @@ public enum Pipeline {
 
     public static func run(input: PixelImage, resolution: ResolutionInfo,
                            options: DeskewOptions,
-                           inputTiffCompression: TiffCompression? = nil) throws -> PipelineResult {
+                           inputTiffCompression: TiffCompression? = nil,
+                           inputFormat: PixelFormat? = nil) throws -> PipelineResult {
         let workingGray = input.toGray()
 
         var effectiveResolution = resolution
@@ -81,7 +84,7 @@ public enum Pipeline {
 
         var result = PipelineResult(outputImage: nil, workImage: nil, changed: false,
                                     skewAngle: detection.angle, stats: detection.stats, log: log,
-                                    resolvedTiffCompression: nil)
+                                    resolvedTiffCompression: nil, resolvedOutputFormat: nil)
 
         // Compression TIFF effective (option `input` reprise des métadonnées).
         let effectiveTiffCompression: TiffCompression?
@@ -130,6 +133,15 @@ public enum Pipeline {
         }
 
         result.outputImage = output
+        let binaryOutput = options.forcedOutputFormat == .binary || effectiveTiffCompression == .g4
+        if binaryOutput {
+            result.resolvedOutputFormat = .binary
+        } else if !result.changed, options.forcedOutputFormat == nil {
+            // Image inchangée : l'original conserve le format d'entrée.
+            result.resolvedOutputFormat = inputFormat ?? output?.format
+        } else {
+            result.resolvedOutputFormat = output?.format
+        }
         return result
     }
 

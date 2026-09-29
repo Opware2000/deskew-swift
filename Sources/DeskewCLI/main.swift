@@ -9,8 +9,8 @@ import Foundation
 import DeskewCore
 import DeskewImageIO
 
-let appTitle = "Deskew Swift 0.1 — réimplémentation de Deskew 1.33 by Marek Mauder"
-let appHome = "https://github.com/Opware2000/deskew-swift"
+let appTitle = "Deskew 1.33 (2025-06-02) by Marek Mauder"
+let appHome = "https://github.com/galfar/deskew\nhttps://galfar.vevb.net/deskew"
 
 func writeUsage() {
     print("""
@@ -88,7 +88,8 @@ print("Preparing input image (\(FilePath.fileName(inputName)) [\(loaded.width)x\
 let result: PipelineResult
 do {
     result = try Pipeline.run(input: loaded.image, resolution: loaded.resolution,
-                              options: options, inputTiffCompression: loaded.tiffCompression)
+                              options: options, inputTiffCompression: loaded.tiffCompression,
+                              inputFormat: loaded.format)
 } catch {
     print("")
     print(error)
@@ -115,7 +116,7 @@ guard let outputImage = result.outputImage else {
     exit(0)
 }
 
-print("Saving output (\(outputName) [\(outputImage.width)x\(outputImage.height)/\(outputImage.format.name)]) ...")
+print("Saving output (\(FilePath.expandFileName(outputName)) [\(outputImage.width)x\(outputImage.height)/\(result.resolvedOutputFormat?.name ?? outputImage.format.name)]) ...")
 
 let directory = FilePath.fileDir(outputName)
 if !directory.isEmpty {

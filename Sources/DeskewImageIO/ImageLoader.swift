@@ -74,32 +74,51 @@ public enum ImageLoader {
 
         let resolution = resolution(from: source)
         let tiffCompression = tiffCompression(from: source)
+        let sourceFormat = sourceFormat(from: source, cgImage: cgImage)
 
         // Image monochrome sans alpha : lecture directe en Gray8.
         if cgImage.colorSpace?.model == .monochrome,
            cgImage.alphaInfo == .none || cgImage.alphaInfo == .noneSkipLast || cgImage.alphaInfo == .noneSkipFirst {
             let gray = try drawGray(cgImage, path: path)
-            return LoadedImage(image: .gray(gray), format: .gray8,
+            return LoadedImage(image: .gray(gray), format: sourceFormat,
                                resolution: resolution, tiffCompression: tiffCompression)
         }
 
         if hasAlphaChannel(cgImage) {
             let rgba = try drawRGBA(cgImage, path: path)
-            return LoadedImage(image: .rgba(rgba), format: .rgba32,
+            return LoadedImage(image: .rgba(rgba), format: sourceFormat,
                                resolution: resolution, tiffCompression: tiffCompression)
         } else {
             let rgb = try drawRGB(cgImage, path: path)
+            let isIndexed = cgImage.colorSpace?.model == .indexed
             // Image indexée (palette) : ImageIO l'étend en RGB. On reproduit la
             // décision d'Imaging « palette en niveaux de gris -> Gray8 » en
             // analysant le contenu décodé.
-            if cgImage.colorSpace?.model == .indexed, rgb.isGrayscale {
+            if isIndexed, rgb.isGrayscale {
                 let gray = PixelImage.rgb(rgb).toGray()
-                return LoadedImage(image: .gray(gray), format: .gray8,
+                return LoadedImage(image: .gray(gray), format: sourceFormat,
                                    resolution: resolution, tiffCompression: tiffCompression)
             }
-            return LoadedImage(image: .rgb(rgb), format: .rgb24,
+            return LoadedImage(image: .rgb(rgb), format: sourceFormat,
                                resolution: resolution, tiffCompression: tiffCompression)
         }
+    }
+
+    /// Format source affiché (équivalent des noms de format d'Imaging).
+    ///
+    /// Déduit des propriétés de la source (profondeur, modèle de couleur) et de
+    /// l'espace colorimétrique décodé : 1 bit → Binary, indexé → Index8,
+    /// gris → Gray8, alpha → A8R8G8B8, sinon → R8G8B8.
+    private static func sourceFormat(from source: CGImageSource, cgImage: CGImage) -> PixelFormat {
+        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
+        let depth = properties?[kCGImagePropertyDepth] as? Int ?? 8
+        let colorModel = properties?[kCGImagePropertyColorModel] as? String
+
+        if depth == 1 { return .binary }
+        if cgImage.colorSpace?.model == .indexed { return .index8 }
+        if colorModel == "Gray" { return .gray8 }
+        if hasAlphaChannel(cgImage) { return .rgba32 }
+        return .rgb24
     }
 
     /// Compression TIFF de l'image source (pour l'option `tinput`).
