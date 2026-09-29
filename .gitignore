@@ -28,3 +28,8 @@ deskew.cfg
 # Logs locaux (outils de développement)
 logs/
 
+# Swift Package Manager
+.build/
+.swiftpm/
+DerivedData/
+
