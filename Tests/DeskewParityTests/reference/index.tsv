@@ -1,0 +1,37 @@
+detect-1big	none	-g d -s s TestImages/1big.png
+detect-1-g4	none	-g d -s s TestImages/1-g4.tif
+detect-1-lzw	none	-g d -s s TestImages/1-lzw.tif
+detect-2	none	-g d -s s TestImages/2.png
+detect-3	none	-g d -s s TestImages/3.png
+detect-4	none	-g d -s s TestImages/4.png
+detect-5	none	-g d -s s TestImages/5.png
+detect-6	none	-g d -s s TestImages/6.png
+detect-F1550	none	-g d -s s TestImages/F1550.jpg
+detect-tiff-jpeg	none	-g d -s s TestImages/tiff-jpeg.tif
+detect-4-rect	none	-g d -s s -r 214,266,933,1040 TestImages/4.png
+detect-4-rect-explicit	none	-g d -s s -t 100 -r 214,266,933,1040 TestImages/4.png
+detect-5-explicit	none	-g d -s s -t 128 TestImages/5.png
+rot-2-default	png	-o Tests/DeskewParityTests/reference/rot-2-default/out.png TestImages/2.png
+rot-2-otsu-a10	png	-t a -a 10 -o Tests/DeskewParityTests/reference/rot-2-otsu-a10/out.png TestImages/2.png
+rot-3	png	-a 10 -o Tests/DeskewParityTests/reference/rot-3/out.png TestImages/3.png
+rot-4	png	-o Tests/DeskewParityTests/reference/rot-4/out.png TestImages/4.png
+rot-5-lanczos	png	-q lanczos -a 10 -o Tests/DeskewParityTests/reference/rot-5-lanczos/out.png TestImages/5.png
+rot-1big-cubic	png	-q cubic -o Tests/DeskewParityTests/reference/rot-1big-cubic/out.png TestImages/1big.png
+rot-F1550-crop	jpg	-g c -o Tests/DeskewParityTests/reference/rot-F1550-crop/out.jpg TestImages/F1550.jpg
+rot-2-t128	png	-t 128 -o Tests/DeskewParityTests/reference/rot-2-t128/out.png TestImages/2.png
+rot-F1550-t180	jpg	-t 180 -o Tests/DeskewParityTests/reference/rot-F1550-t180/out.jpg TestImages/F1550.jpg
+rot-5-nearest-bg	png	-q nearest -b 00FFFF -o Tests/DeskewParityTests/reference/rot-5-nearest-bg/out.png TestImages/5.png
+rot-4-rect	png	-r 214,266,933,1040 -o Tests/DeskewParityTests/reference/rot-4-rect/out.png TestImages/4.png
+rot-4-rect-stats	png	-t 100 -a 11 -b aa55cc -r 314,366,833,940 -s sp -o Tests/DeskewParityTests/reference/rot-4-rect-stats/out.png TestImages/4.png
+rot-2-b1	png	-f b1 -o Tests/DeskewParityTests/reference/rot-2-b1/out.png TestImages/2.png
+rot-6-rgba	png	-f rgba32 -b 40ff00ff -o Tests/DeskewParityTests/reference/rot-6-rgba/out.png TestImages/6.png
+rot-6-g8	png	-f g8 -b 77 -s sp -o Tests/DeskewParityTests/reference/rot-6-g8/out.png TestImages/6.png
+rot-5-skip	png	-a 10 -l 20 -o Tests/DeskewParityTests/reference/rot-5-skip/out.png TestImages/5.png
+work-2	png	-s w -o Tests/DeskewParityTests/reference/work-2/out.png TestImages/2.png
+work-4-rect	png	-s w -t 100 -r 214,266,933,1040 -o Tests/DeskewParityTests/reference/work-4-rect/out.png TestImages/4.png
+rot-1-lzw-tiff	tif	-t a -a 5 -o Tests/DeskewParityTests/reference/rot-1-lzw-tiff/out.tif TestImages/1-lzw.tif
+rot-tiff-jpeg	tif	-b DD -c j95,tjpeg -o Tests/DeskewParityTests/reference/rot-tiff-jpeg/out.tif TestImages/tiff-jpeg.tif
+rot-1-g4-input	tif	-t 128 -c tinput -o Tests/DeskewParityTests/reference/rot-1-g4-input/out.tif TestImages/1-g4.tif
+rot-1-deflate	tif	-b FF0000 -c tdeflate -o Tests/DeskewParityTests/reference/rot-1-deflate/out.tif TestImages/1-lzw.tif
+rot-1-b1-tiff	tif	-f b1 -o Tests/DeskewParityTests/reference/rot-1-b1-tiff/out.tif TestImages/1-lzw.tif
+rot-1-skip-tiff	tif	-a 5 -l 2 -o Tests/DeskewParityTests/reference/rot-1-skip-tiff/out.tif TestImages/1-lzw.tif

@@ -1,0 +1,1 @@
+-f b1 -o Tests/DeskewParityTests/reference/rot-1-b1-tiff/out.tif TestImages/1-lzw.tif

@@ -1,0 +1,1 @@
+-s w -o Tests/DeskewParityTests/reference/work-2/out.png TestImages/2.png

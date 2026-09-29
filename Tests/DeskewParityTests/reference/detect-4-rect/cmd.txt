@@ -1,0 +1,1 @@
+-g d -s s -r 214,266,933,1040 TestImages/4.png

@@ -1,0 +1,1 @@
+-a 5 -l 2 -o Tests/DeskewParityTests/reference/rot-1-skip-tiff/out.tif TestImages/1-lzw.tif

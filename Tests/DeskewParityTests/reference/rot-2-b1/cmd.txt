@@ -1,0 +1,1 @@
+-f b1 -o Tests/DeskewParityTests/reference/rot-2-b1/out.png TestImages/2.png

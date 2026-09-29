@@ -1,0 +1,1 @@
+-r 214,266,933,1040 -o Tests/DeskewParityTests/reference/rot-4-rect/out.png TestImages/4.png

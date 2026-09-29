@@ -1,0 +1,1 @@
+-f g8 -b 77 -s sp -o Tests/DeskewParityTests/reference/rot-6-g8/out.png TestImages/6.png

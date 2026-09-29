@@ -1,0 +1,1 @@
+-b FF0000 -c tdeflate -o Tests/DeskewParityTests/reference/rot-1-deflate/out.tif TestImages/1-lzw.tif

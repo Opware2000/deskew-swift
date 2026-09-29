@@ -1,0 +1,34 @@
+Deskew 1.33 (2025-06-02) by Marek Mauder
+https://github.com/galfar/deskew
+https://galfar.vevb.net/deskew
+
+Parameters: -f g8 -b 77 -s sp -o Tests/DeskewParityTests/reference/rot-6-g8/out.png TestImages/6.png 
+  input file          = TestImages/6.png
+  output file         = Tests/DeskewParityTests/reference/rot-6-g8/out.png
+  background color    = FF777777
+  resampling filter   = linear
+  max angle           = 10
+  angle step          = 0.1
+  thresholding method = auto otsu
+  threshold level     = 128
+  content rect        = 0.00,0.00,0.00,0.00 px
+  content margins     = 0.00,0.00,0.00,0.00 px
+  output format       = Gray8
+  skip angle          = 0.01
+  dpi override        = 0
+  oper flags          = 
+  info flags          = params detection-stats 
+  output compression  = jpeg:default tiff:default
+
+Preparing input image (6.png [1120x1415/Index8]) ...
+Calculating skew angle using threshold 178...
+Skew angle found [deg]: -2.810
+Skew detection stats:
+  pixel count:               1,583,680
+  tested pixels:                40,297
+  accumulator size:          1,013,600
+  accumulated counts:        8,059,400
+  best count:                      356
+Rotating image...
+Saving output (<ROOT>/Tests/DeskewParityTests/reference/rot-6-g8/out.png [1190x1470/Gray8]) ...
+Done!

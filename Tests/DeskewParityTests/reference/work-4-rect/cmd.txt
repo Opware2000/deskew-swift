@@ -1,0 +1,1 @@
+-s w -t 100 -r 214,266,933,1040 -o Tests/DeskewParityTests/reference/work-4-rect/out.png TestImages/4.png

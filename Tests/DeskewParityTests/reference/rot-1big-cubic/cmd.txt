@@ -1,0 +1,1 @@
+-q cubic -o Tests/DeskewParityTests/reference/rot-1big-cubic/out.png TestImages/1big.png

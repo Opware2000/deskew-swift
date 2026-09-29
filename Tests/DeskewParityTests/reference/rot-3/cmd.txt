@@ -1,0 +1,1 @@
+-a 10 -o Tests/DeskewParityTests/reference/rot-3/out.png TestImages/3.png

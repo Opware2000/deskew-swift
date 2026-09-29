@@ -1,0 +1,1 @@
+-q lanczos -a 10 -o Tests/DeskewParityTests/reference/rot-5-lanczos/out.png TestImages/5.png

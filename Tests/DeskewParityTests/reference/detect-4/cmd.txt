@@ -1,0 +1,1 @@
+-g d -s s TestImages/4.png

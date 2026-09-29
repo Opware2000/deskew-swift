@@ -1,0 +1,1 @@
+-q nearest -b 00FFFF -o Tests/DeskewParityTests/reference/rot-5-nearest-bg/out.png TestImages/5.png

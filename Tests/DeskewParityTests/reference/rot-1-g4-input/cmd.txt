@@ -1,0 +1,1 @@
+-t 128 -c tinput -o Tests/DeskewParityTests/reference/rot-1-g4-input/out.tif TestImages/1-g4.tif

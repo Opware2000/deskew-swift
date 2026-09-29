@@ -1,0 +1,1 @@
+-t a -a 10 -o Tests/DeskewParityTests/reference/rot-2-otsu-a10/out.png TestImages/2.png

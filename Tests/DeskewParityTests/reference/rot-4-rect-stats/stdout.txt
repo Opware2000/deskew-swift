@@ -1,0 +1,34 @@
+Deskew 1.33 (2025-06-02) by Marek Mauder
+https://github.com/galfar/deskew
+https://galfar.vevb.net/deskew
+
+Parameters: -t 100 -a 11 -b aa55cc -r 314,366,833,940 -s sp -o Tests/DeskewParityTests/reference/rot-4-rect-stats/out.png TestImages/4.png 
+  input file          = TestImages/4.png
+  output file         = Tests/DeskewParityTests/reference/rot-4-rect-stats/out.png
+  background color    = FFAA55CC
+  resampling filter   = linear
+  max angle           = 11
+  angle step          = 0.1
+  thresholding method = explicit
+  threshold level     = 100
+  content rect        = 314.00,366.00,833.00,940.00 px
+  content margins     = 0.00,0.00,0.00,0.00 px
+  output format       = default
+  skip angle          = 0.01
+  dpi override        = 0
+  oper flags          = 
+  info flags          = params detection-stats 
+  output compression  = jpeg:default tiff:default
+
+Preparing input image (4.png [1241x1748/Binary]) ...
+Calculating skew angle (in [314,366,833,940]) using threshold 100...
+Skew angle found [deg]: 7.030
+Skew detection stats:
+  pixel count:                 297,906
+  tested pixels:                13,294
+  accumulator size:            480,920
+  accumulated counts:        2,924,680
+  best count:                      277
+Rotating image...
+Saving output (<ROOT>/Tests/DeskewParityTests/reference/rot-4-rect-stats/out.png [1447x1888/R8G8B8]) ...
+Done!

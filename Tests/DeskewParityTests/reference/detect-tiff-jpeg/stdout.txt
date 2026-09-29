@@ -1,0 +1,14 @@
+Deskew 1.33 (2025-06-02) by Marek Mauder
+https://github.com/galfar/deskew
+https://galfar.vevb.net/deskew
+
+Preparing input image (tiff-jpeg.tif [336x575/R8G8B8]) ...
+Calculating skew angle using threshold 183...
+Skew angle found [deg]: 3.395
+Skew detection stats:
+  pixel count:                 192,864
+  tested pixels:                 3,061
+  accumulator size:            364,000
+  accumulated counts:          612,200
+  best count:                      251
+Done!

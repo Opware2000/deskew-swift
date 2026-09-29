@@ -1,0 +1,1 @@
+-f rgba32 -b 40ff00ff -o Tests/DeskewParityTests/reference/rot-6-rgba/out.png TestImages/6.png
