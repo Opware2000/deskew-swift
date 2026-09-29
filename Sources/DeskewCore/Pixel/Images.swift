@@ -105,6 +105,17 @@ public struct RGBImage: Equatable, Sendable {
             i += Self.bytesPerPixel
         }
     }
+
+    /// Remplit un rectangle (clippé aux bornes de l'image).
+    public mutating func fill(rect: IntRect, _ value: RGB24) {
+        let r = rect.intersect(bounds)
+        guard !r.isEmpty else { return }
+        for y in r.top..<r.bottom {
+            for x in r.left..<r.right {
+                self[x, y] = value
+            }
+        }
+    }
 }
 
 /// Image ARGB 32 bits, 4 octets par pixel, ordre mémoire B, G, R, A
@@ -161,6 +172,17 @@ public struct RGBAImage: Equatable, Sendable {
             pixels[i + 2] = value.r
             pixels[i + 3] = value.a
             i += Self.bytesPerPixel
+        }
+    }
+
+    /// Remplit un rectangle (clippé aux bornes de l'image).
+    public mutating func fill(rect: IntRect, _ value: RGBA32) {
+        let r = rect.intersect(bounds)
+        guard !r.isEmpty else { return }
+        for y in r.top..<r.bottom {
+            for x in r.left..<r.right {
+                self[x, y] = value
+            }
         }
     }
 }
