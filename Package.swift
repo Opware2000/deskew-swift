@@ -12,7 +12,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "DeskewCore"),
-        .executableTarget(name: "DeskewCLI", dependencies: ["DeskewCore"]),
-        .testTarget(name: "DeskewCoreTests", dependencies: ["DeskewCore"])
+        .target(name: "DeskewImageIO", dependencies: ["DeskewCore"]),
+        .executableTarget(name: "DeskewCLI", dependencies: ["DeskewCore", "DeskewImageIO"]),
+        .testTarget(name: "DeskewCoreTests", dependencies: ["DeskewCore", "DeskewImageIO"])
     ]
 )
