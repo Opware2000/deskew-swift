@@ -1,164 +1,98 @@
-Deskew
-=======================
+# Deskew Swift
 
-by Marek Mauder  
-<https://galfar.vevb.net/deskew>  
-<https://github.com/galfar/deskew>  
+Réimplémentation en **Swift** de [**Deskew**](https://github.com/galfar/deskew), l'outil
+en ligne de commande qui redresse automatiquement (deskew) les documents numérisés.
 
-**v1.30 2019-06-07**
+> **Projet original :** Deskew, par Marek Mauder — <https://github.com/galfar/deskew>
+> (licence MPL 2.0). Ce dépôt en est un travail dérivé ; il conserve l'historique Git
+> complet et l'attribution d'origine.
 
-Overview
-------------------------
+## Pourquoi une réimplémentation ?
 
-Deskew is a command line tool for deskewing scanned text documents.
-It uses Hough transform to detect "text lines" in the image. As an output, you
-get an image rotated so that the lines are horizontal.
+Deskew est écrit en Object Pascal (Free Pascal / Delphi). Ce dépôt vise une version
+native **Swift** pour :
 
-There are pre-compiled binaries built for these platforms (located in Bin folder):
-Win64 (`deskew.exe`), Win32 (`deskew32.exe`), Linux x86_64 (`deskew`), macOS x86_64 (`deskew-mac`), Linux ARM aarch64 (`deskew-arm64`) and v7 (`deskew-arm`).
+- profiter de la compilation native **arm64** (Apple Silicon) ;
+- optimiser les algorithmes (Accelerate / vDSP / vImage, SIMD) ;
+- **paralléliser** les étapes coûteuses (transformée de Hough, rotation, seuillage) ;
+- s'appuyer sur les frameworks macOS natifs (ImageIO / Core Graphics) pour les
+  entrées-sorties d'images.
 
-GUI frontend for this CLI tool is available as well (Windows, Linux, and macOS), see [GUI's Readme](Gui/Readme.md).
+L'objectif est de **reproduire fidèlement les algorithmes** du projet original
+(parité des résultats) tout en modernisant la base technique.
 
-License: MPL 2.0
+## État du projet
 
-### Downloads And Releases
+| Étape | État |
+| ----- | ---- |
+| Analyse du code Pascal et documentation de réimplémentation | ✅ |
+| Oracle v1.33 compilé + golden files de parité | ✅ |
+| Squelette du package Swift | ⬜ à faire |
+| Algorithmes (Otsu, binarisation, rotation, Hough) | ⬜ à faire |
+| Entrées-sorties ImageIO | ⬜ à faire |
+| Multithreading et optimisation | ⬜ à faire |
 
-<https://github.com/galfar/deskew/releases>  
-<https://galfar.vevb.net/deskew#downloads>  
+## Organisation du dépôt
 
-Usage
-------------------------
+| Chemin | Contenu |
+| ------ | ------- |
+| `Documentation/` | **Documentation de réimplémentation** (algorithmes, CLI, cible Swift, tests) |
+| `Tests/DeskewParityTests/` | Golden files (références) produits par le binaire Pascal |
+| `RotationDetector.pas` | Code Pascal d'origine : détection d'inclinaison (Hough) |
+| `ImageUtils.pas` | Code Pascal d'origine : Otsu, binarisation, rotation |
+| `CmdLineOptions.pas`, `MainUnit.pas`, `Utils.pas` | Code Pascal d'origine : CLI et orchestration |
+| `Imaging/` | Bibliothèque tierce Vampyre Imaging (code du projet original) |
+| `TestImages/` | Images de test |
+| `Scripts/compile_local.sh` | Compile l'oracle Pascal (v1.33) en local |
+
+La documentation de démarrage se trouve dans
+[`Documentation/README.md`](Documentation/README.md).
+
+## Golden files (tests de parité)
+
+Les fichiers de référence sont générés depuis le binaire Pascal d'origine puis servent
+d'oracle aux futurs tests Swift :
+
+```bash
+# Prérequis : Free Pascal (brew install fpc), et libtiff pour le support TIFF
+brew install fpc
+
+Scripts/compile_local.sh                                   # → Bin/deskew (oracle)
+Tests/DeskewParityTests/generate_reference.sh              # → Tests/DeskewParityTests/reference/
+```
+
+Détails : [`Tests/DeskewParityTests/README.md`](Tests/DeskewParityTests/README.md).
+
+## Utilisation de l'original (rappel)
 
 ```console
 Usage:
 deskew [-o output] [-a angle] [-b color] [..] input
     input:         Input image file
   Options:
-    -o output:     Output image file (default: out.png)
-    -a angle:      Maximal expected skew angle (both directions) in degrees (default: 10)
+    -o output:     Output image file name (default: prefixed input as png)
     -b color:      Background color in hex format RRGGBB|LL|AARRGGBB (default: black)
-  Ext. options:
     -q filter:     Resampling filter used for rotations (default: linear,
                    values: nearest|linear|cubic|lanczos)
-    -t a|treshold: Auto threshold or value in 0..255 (default: a)
-    -r rect:       Skew detection only in content rectangle (pixels):
-                   left,top,right,bottom (default: whole page)
-    -f format:     Force output pixel format (values: b1|g8|rgb24|rgba32)
-    -l angle:      Skip deskewing step if skew angle is smaller (default: 0.01)
+    -a angle:      Maximal expected skew angle (both directions) in degrees (default: 10)
+    -t a|treshold: Auto threshold or value in 0..255 (default: auto)
     -g flags:      Operational flags (any combination of):
-                   c - auto crop, d - detect only (no output to file)
-    -s info:       Info dump (any combination of):
-                   s - skew detection stats, p - program parameters, t - timings
-    -c specs:      Output compression specs for some file formats. Several specs
-                   can be defined - delimited by commas. Supported specs:
-                   jXX - JPEG compression quality, XX is in range [1,100(best)]
-                   tSCHEME - TIFF compression scheme: none|lzw|rle|deflate|jpeg|g4
-
-  Supported file formats
-    Input:  BMP, JPG, PNG, JNG, GIF, DDS, TGA, PBM, PGM, PPM, PAM, PFM, TIF, PSD
-    Output: BMP, JPG, PNG, JNG, GIF, DDS, TGA, PGM, PPM, PAM, PFM, TIF, PSD
+                   c - crop to input size, d - detect only (no output to file)
+    ...
 ```
 
-### Notes
+Voir le [Readme du projet original](Readme-original.md) pour la documentation complète
+du programme d'origine.
 
-For TIFF support in Linux and macOS you need to have libtiff 4.x installed (package is usually called libtiff5).
+## Licence
 
-For macOS you can download prebuilt libtiff binaries here: <https://galfar.github.io/store/TiffLibBins-macOS.zip>. Just put the files inside the archive to the same folder as `deskew-mac` executable.
+Ce projet est distribué sous **Mozilla Public License 2.0** (MPL 2.0), comme le projet
+original. Voir [`LICENSE`](LICENSE).
 
-On ARM targets linking to libtiff is disabled at the moment (known
-to crash with deskew). If you want to try yourself enable it in `ImagingTiff.pas` unit.
+Le code Pascal présent dans ce dépôt provient de
+[galfar/deskew](https://github.com/galfar/deskew) et reste soumis à sa licence et à son
+attribution :
 
-You can find some test images in TestImages folder and
-scripts to run tests (`RunTests.bat` and `runtests.sh`) in Bin.
-By default scripts just call `deskew` command but you can pass a different one as a parameter
-(e.g. `runtests.sh deskew-arm`).
-
-### Bugs, Issues, Proposals
-
-File them here:  
-<https://github.com/galfar/deskew/issues>
-
-
-Version History
-------------------------
-
-v1.30 2019-06-07:
-
-- fix #15: Better image quality after rotation - better default and also selectable nearest|linear|cubic|lanczos filtering
-- fix #5: Detect skew angle only (no rotation done) - optionally only skew detection
-- fix #17: Optional auto-crop after rotation
-- fix #3: Command line option to set output compression - now for TIFF and JPEG
-- fix #12: Bad behavior when an output is given and no deskewing is needed
-- libtiff in macOS is now picked up also when binaries are put directly in the directory with deskew
-- text output is flushed after every write (Linux/Unix): it used to be flushed only when writing to device but not file/pipe.
-
-v1.25 2018-05-19:
-
-- fix #6: Preserve DPI measurement system (TIFF)
-- fix #4: Output image not saved in requested format (when deskewing is skipped)
-- dynamic loading of libtiff library - adds TIFF support in macOS when libtiff is installed
-
-v1.21 2017-11-01:
-
-- fix #8: Cannot compile in Free Pascal 3.0+ (Windows) - Fails to link precompiled LibTiff library
-- fix #7: Windows FPC build fails with *Access violation exception* when loading certain TIFFs (especially those saved by Windows Photo Viewer etc.)
-
-v1.20 2016-09-01:
-
-- much faster rotation, especially when background color is set (>2x faster, 2x less memory)
-- can skip deskewing step if detected skew angle is lower than parameter
-- new option for timing of individual steps
-- fix: crash when last row of page is classified as text
-- misc: default back color is now opaque black, new forced output format  "rgb24",  background color can define also alpha channel, nicer formatting of text output
-
-v1.10 2014-03-04:
-
-- TIFF support for Win64 and 32/64bit Linux
-- forced output formats
-- fix: output file names were always lowercase
-- fix: preserves resolution metadata (e.g. 300dpi) of input when writing output
-
-v1.00 2012-06-04:
-
-- background color
-- "area of interest" content rectangle
-- 64bit and Mac OSX support
-- PSD and TIFF (win32) support
-- show skew detection stats and program parameters
-
-v0.95 2010-12-28:
-
-- Added auto thresholding
-
-v0.90 2010-02-12:
-
-- Initial version
-
-
-Compiling Deskew
-------------------------
-
-Deskew is written in Object Pascal. You need Free Pascal or Delphi to recompile it.
-
-### Tested Compilers
-
-There are project files for these IDEs:
-
-  1. Lazarus 2.2.2 (deskew.lpi)
-  2. Delphi XE + 10.3 (deskew.dproj)
-
-Additionally, there are compile shell/batch scripts for standalone FPC compiler in `Scripts` folder.
-
-### Supported/Tested Platforms
-
-Deskew can be compiled and was tested on these platforms:
-Win32, Win64, Linux x86_64, macOS x86_64, Linux ARM aarch64 + v7.
-
-### Source Code
-
-Latest source code can be found here:  
-<https://github.com/galfar/deskew>
-
-### Dependencies
-
-Vampyre Imaging Library is needed for compilation and it's included in Deskew's repo in Imaging folder.
+- **Auteur original :** Marek Mauder
+- **Site :** <https://galfar.vevb.net/deskew>
+- **Code source :** <https://github.com/galfar/deskew>
