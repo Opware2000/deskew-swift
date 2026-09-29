@@ -111,6 +111,11 @@ deskew [-o output] [-a angle] [-b color] [..] input
 Voir le [Readme du projet original](Readme-original.md) pour la documentation complète
 du programme d'origine.
 
+## Contribuer
+
+Les conventions (code, commits, tests, golden files) sont décrites dans
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Licence
 
 Ce projet est distribué sous **Mozilla Public License 2.0** (MPL 2.0), comme le projet
