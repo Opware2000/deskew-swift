@@ -31,8 +31,8 @@ Liste des tâches, dérivée de
 - [x] `Package.swift` + arborescence `Sources/DeskewCore`, `DeskewImageIO`, `DeskewCLI`
 - [x] `.gitignore` Swift (`.build/`, `.swiftpm/`, `DerivedData/`)
 - [x] `LICENSE` (MPL 2.0) à la racine
-- [ ] Dépendance `swift-argument-parser` (remplacée par un parsing maison fidèle)
-- [ ] CI GitHub Actions `swift build` + `swift test` (macOS ARM)
+- [x] CI GitHub Actions : `swift build` + `swift test -c release` (macOS ARM)
+- [x] `swift-argument-parser` : écarté au profit d'un parsing maison fidèle
 - [ ] `CONTRIBUTING.md`
 
 ## Phase 1 — Types et géométrie
