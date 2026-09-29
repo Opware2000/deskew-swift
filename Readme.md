@@ -32,6 +32,8 @@ L'objectif est de **reproduire fidèlement les algorithmes** du projet original
 | Entrées-sorties ImageIO | ⬜ à faire |
 | Multithreading et optimisation | ⬜ à faire |
 
+Suivi détaillé des tâches restantes : [`TODO.md`](TODO.md).
+
 ## Organisation du dépôt
 
 | Chemin | Contenu |
