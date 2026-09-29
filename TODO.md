@@ -84,10 +84,10 @@ Liste des tâches, dérivée de
 - [x] Espace colorimétrique source (évite les conversions)
 - [x] `ImageWriter` : PNG/JPEG/TIFF/GIF/BMP + qualité/compression/DPI
 - [x] `PixelImage.converted` et `ensureRotatable`
-- [ ] Gestion explicite des palettes (`PaletteHasAlpha`, `PaletteIsGrayScale`)
-- [ ] Décision produit documentée pour DDS/TGA/Netpbm/JNG/QOI
-- [ ] Tests de round-trip écriture/lecture
-- [ ] Comparaison stricte des sorties TIFF compressées
+- [x] Gestion explicite des palettes (`Palette`, `rotationFormat`, gris détecté)
+- [x] Décision produit documentée pour DDS/TGA/Netpbm/JNG/QOI
+- [x] Tests de round-trip écriture/lecture (PNG/TIFF lossless, JPEG)
+- [x] Comparaison stricte des sorties TIFF compressées (none/lzw/deflate/rle + tag)
 
 ## Phase 7 — Pipeline et exécutable
 

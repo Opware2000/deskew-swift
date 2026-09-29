@@ -116,6 +116,18 @@ public struct RGBImage: Equatable, Sendable {
             }
         }
     }
+
+    /// `true` si tous les pixels sont en niveaux de gris (R == G == B).
+    public var isGrayscale: Bool {
+        var i = 0
+        while i < pixels.count {
+            if pixels[i] != pixels[i + 1] || pixels[i] != pixels[i + 2] {
+                return false
+            }
+            i += 3
+        }
+        return true
+    }
 }
 
 /// Image ARGB 32 bits, 4 octets par pixel, ordre mémoire B, G, R, A

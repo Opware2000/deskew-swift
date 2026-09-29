@@ -89,6 +89,14 @@ public enum ImageLoader {
                                resolution: resolution, tiffCompression: tiffCompression)
         } else {
             let rgb = try drawRGB(cgImage, path: path)
+            // Image indexée (palette) : ImageIO l'étend en RGB. On reproduit la
+            // décision d'Imaging « palette en niveaux de gris -> Gray8 » en
+            // analysant le contenu décodé.
+            if cgImage.colorSpace?.model == .indexed, rgb.isGrayscale {
+                let gray = PixelImage.rgb(rgb).toGray()
+                return LoadedImage(image: .gray(gray), format: .gray8,
+                                   resolution: resolution, tiffCompression: tiffCompression)
+            }
             return LoadedImage(image: .rgb(rgb), format: .rgb24,
                                resolution: resolution, tiffCompression: tiffCompression)
         }

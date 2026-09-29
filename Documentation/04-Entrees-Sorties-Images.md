@@ -48,6 +48,19 @@ cette couche par les frameworks natifs de macOS : **ImageIO** + **Core Graphics*
    dépendance.
 3. Exclure explicitement JNG, DDS, QOI, écriture PSD (documenter comme non supporté).
 
+### Décision v1 (formats)
+
+| Format | Décision v1 | Motif |
+| ------ | ----------- | ----- |
+| PNG, JPEG, TIFF, GIF, BMP | **Supportés** (lecture + écriture) | natifs ImageIO, couvrent le cas d'usage |
+| PSD | **Lecture seule** | ImageIO lit PSD, écriture non fiable |
+| DDS, TGA, JNG, QOI | **Exclus** | non supportés par ImageIO ; codecs tiers hors périmètre |
+| PBM, PGM, PPM, PAM, PFM (Netpbm) | **Exclus en v1**, candidats v2 | codecs texte/binaire simples à ajouter si besoin |
+| HEIC/HEIF | Bonus (lecture/écriture) | présent nativement, non demandé |
+
+Le message d'erreur pour un format non supporté est
+`ERROR: Input/Output file format not supported: <fichier>`, identique à l'original.
+
 ## 3. Chargement d'une image (équivalent `LoadFromFile`)
 
 En Swift :
@@ -179,7 +192,20 @@ sinon si Format == Gray8 ET fond non gris (R≠G ou B≠G) :
   Format = RGB24
 ```
 
-### 6.3 `-f` (format forcé)
+### 6.3 Palettes
+
+ImageIO n'expose jamais d'image indexée : un PNG/GIF à palette est **étendu** en
+RGB (ou en niveaux de gris). On reproduit néanmoins la décision d'Imaging
+« palette en niveaux de gris → Gray8 » en analysant le contenu décodé : si tous les
+pixels sont gris (R == G == B), l'image est chargée en `Gray8`, sinon en `RGB24`.
+
+Le type `Palette` (`DeskewCore`) fournit `hasAlpha` et `isGrayScale`
+(équivalents de `PaletteHasAlpha` / `PaletteIsGrayScale`), et
+`PixelFormat.rotationFormat(palette:background:)` reproduit la branche `ifIndex8`
+de `EnsurePixelFormatForRotation` (alpha → ARGB32 ; gris → Gray8 ; sinon RGB24,
+avec les ajustements liés à la couleur de fond).
+
+### 6.4 `-f` (format forcé)
 
 Appliqué **juste avant sauvegarde**. Cas particulier : `-f b1` (binaire) accepté même
 si la rotation a introduit des niveaux de gris (l'utilisateur l'a demandé
