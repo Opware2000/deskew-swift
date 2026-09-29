@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Dispatch
 
 /// Rotation d'image avec rééchantillonnage.
 ///
@@ -31,8 +32,10 @@ public enum ImageRotation {
             let sampler = Sampler(kind: .gray8, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
             var destination = GrayImage(width: plan.dstWidth, height: plan.dstHeight)
-            render(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
-                destination.pixels[index] = color.b
+            destination.pixels.withUnsafeMutableBufferPointer { buffer in
+                renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
+                    buffer[index] = color.b
+                }
             }
             image = destination
         }
@@ -51,11 +54,13 @@ public enum ImageRotation {
             let sampler = Sampler(kind: .rgb24, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
             var destination = RGBImage(width: plan.dstWidth, height: plan.dstHeight)
-            render(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
-                let i = index * RGBImage.bytesPerPixel
-                destination.pixels[i] = color.r
-                destination.pixels[i + 1] = color.g
-                destination.pixels[i + 2] = color.b
+            destination.pixels.withUnsafeMutableBufferPointer { buffer in
+                renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
+                    let i = index * RGBImage.bytesPerPixel
+                    buffer[i] = color.r
+                    buffer[i + 1] = color.g
+                    buffer[i + 2] = color.b
+                }
             }
             image = destination
         }
@@ -74,12 +79,14 @@ public enum ImageRotation {
             let sampler = Sampler(kind: .rgba32, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
             var destination = RGBAImage(width: plan.dstWidth, height: plan.dstHeight)
-            render(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
-                let i = index * RGBAImage.bytesPerPixel
-                destination.pixels[i] = color.b
-                destination.pixels[i + 1] = color.g
-                destination.pixels[i + 2] = color.r
-                destination.pixels[i + 3] = color.a
+            destination.pixels.withUnsafeMutableBufferPointer { buffer in
+                renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
+                    let i = index * RGBAImage.bytesPerPixel
+                    buffer[i] = color.b
+                    buffer[i + 1] = color.g
+                    buffer[i + 2] = color.r
+                    buffer[i + 3] = color.a
+                }
             }
             image = destination
         }
@@ -162,12 +169,38 @@ public enum ImageRotation {
 
     // MARK: - Rendu général
 
+    /// Seuil en dessous duquel on reste séquentiel.
+    static let parallelThreshold = 100_000
+
+    /// Rend l'image destination par bandes de lignes en parallèle.
+    static func renderParallel(sampler: Sampler, filter: ResamplingFilter, plan: RotationPlan,
+                               background: RGBA32, write: (Int, RGBA32) -> Void) {
+        let dstH = plan.dstHeight
+        let total = plan.dstWidth * dstH
+        if total < parallelThreshold {
+            render(sampler: sampler, filter: filter, plan: plan, background: background,
+                   rows: 0..<dstH, write: write)
+            return
+        }
+        let threads = max(1, ProcessInfo.processInfo.activeProcessorCount)
+        let bandHeight = max(1, (dstH + threads * 4 - 1) / (threads * 4))
+        let bands = (dstH + bandHeight - 1) / bandHeight
+        DispatchQueue.concurrentPerform(iterations: bands) { band in
+            let y0 = band * bandHeight
+            let y1 = min(y0 + bandHeight, dstH)
+            if y0 < y1 {
+                render(sampler: sampler, filter: filter, plan: plan, background: background,
+                       rows: y0..<y1, write: write)
+            }
+        }
+    }
+
     static func render(sampler: Sampler, filter: ResamplingFilter, plan: RotationPlan,
-                       background: RGBA32, write: (Int, RGBA32) -> Void) {
+                       background: RGBA32, rows: Range<Int>,
+                       write: (Int, RGBA32) -> Void) {
         let srcW = Float(sampler.width)
         let srcH = Float(sampler.height)
         let dstW = plan.dstWidth
-        let dstH = plan.dstHeight
 
         @inline(__always)
         func sourceCoordinates(_ dstX: Int, _ dstY: Int) -> (Float, Float) {
@@ -180,7 +213,7 @@ public enum ImageRotation {
 
         switch filter {
         case .nearest:
-            for y in 0..<dstH {
+            for y in rows {
                 for x in 0..<dstW {
                     let (sx, sy) = sourceCoordinates(x, y)
                     let color: RGBA32
@@ -196,7 +229,7 @@ public enum ImageRotation {
             }
 
         case .linear:
-            for y in 0..<dstH {
+            for y in rows {
                 for x in 0..<dstW {
                     let (sx, sy) = sourceCoordinates(x, y)
                     write(y * dstW + x, bilinear(sampler: sampler, sx, sy))
@@ -205,7 +238,7 @@ public enum ImageRotation {
 
         case .cubic, .lanczos:
             guard let kernel = KernelTable(filter: filter) else { return }
-            for y in 0..<dstH {
+            for y in rows {
                 for x in 0..<dstW {
                     let (sx, sy) = sourceCoordinates(x, y)
                     write(y * dstW + x,

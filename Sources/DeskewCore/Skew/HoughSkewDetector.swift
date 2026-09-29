@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Dispatch
 
 /// Statistiques de détection d'inclinaison (équivalent de `TCalcSkewAngleStats`).
 public struct SkewStats: Equatable, Sendable {
@@ -96,21 +97,62 @@ public enum HoughSkewDetector {
             pixels[y * width + x] < threshold
         }
 
+        // Pixels « ligne de base » (noir avec pixel du dessous non noir).
+        var testedX = [Int32]()
+        var testedY = [Int32]()
         for y in 0..<pageHeight {
             for x in 0..<pageWidth {
                 let px = areaLeft + x
                 let py = areaTop + y
                 guard px >= 0, px < width, py >= 0, py + 1 < height else { continue }
                 if isBlack(px, py) && !isBlack(px, py + 1) {
-                    let xd = Double(x)
-                    let yd = Double(y)
-                    for i in 0..<alphaSteps {
-                        let d = yd * cosines[i] - xd * sines[i]
-                        let dIndex = Int(d - minDist)
-                        let index = dIndex * alphaSteps + i
-                        if index >= 0 && index < accumulatorSize {
-                            accumulator[index] += 1
+                    testedX.append(Int32(x))
+                    testedY.append(Int32(y))
+                }
+            }
+        }
+
+        // Accumulation : partition par plages d'angles. Deux pas angulaires
+        // distincts écrivent dans des colonnes distinctes de l'accumulateur,
+        // donc aucun verrou n'est nécessaire.
+        let threadCount = min(ProcessInfo.processInfo.activeProcessorCount, alphaSteps)
+        if threadCount > 1 && !testedX.isEmpty {
+            accumulator.withUnsafeMutableBufferPointer { acc in
+                testedX.withUnsafeBufferPointer { xs in
+                    testedY.withUnsafeBufferPointer { ys in
+                        sines.withUnsafeBufferPointer { sinPtr in
+                            cosines.withUnsafeBufferPointer { cosPtr in
+                                DispatchQueue.concurrentPerform(iterations: threadCount) { thread in
+                                    let i0 = thread * alphaSteps / threadCount
+                                    let i1 = (thread + 1) * alphaSteps / threadCount
+                                    for p in 0..<xs.count {
+                                        let xd = Double(xs[p])
+                                        let yd = Double(ys[p])
+                                        for i in i0..<i1 {
+                                            let d = yd * cosPtr[i] - xd * sinPtr[i]
+                                            let dIndex = Int(d - minDist)
+                                            let index = dIndex * alphaSteps + i
+                                            if index >= 0 && index < accumulatorSize {
+                                                acc[index] += 1
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
+                    }
+                }
+            }
+        } else {
+            for p in 0..<testedX.count {
+                let xd = Double(testedX[p])
+                let yd = Double(testedY[p])
+                for i in 0..<alphaSteps {
+                    let d = yd * cosines[i] - xd * sines[i]
+                    let dIndex = Int(d - minDist)
+                    let index = dIndex * alphaSteps + i
+                    if index >= 0 && index < accumulatorSize {
+                        accumulator[index] += 1
                     }
                 }
             }
