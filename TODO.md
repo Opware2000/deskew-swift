@@ -18,7 +18,7 @@ Liste des tâches, dérivée de
 | 6 | Entrées-sorties ImageIO | 🟢 |
 | 7 | Pipeline et exécutable | 🟢 |
 | 8 | Multithreading et performance | 🟡 |
-| 9 | Packaging et release | ⬜ |
+| 9 | Packaging et release | 🟡 |
 
 ---
 
@@ -115,10 +115,10 @@ Liste des tâches, dérivée de
 
 ## Phase 9 — Packaging et release
 
-- [ ] `Scripts/build_release.sh`
+- [x] `Scripts/build_swift_release.sh`
+- [x] Section compilation/utilisation du README
+- [x] CI GitHub Actions : build + tests en release (macOS ARM)
 - [ ] Binaire universel ou arm64 seul (décision)
-- [ ] Section installation/usage du README
-- [ ] CI : artefacts de build, tests en release
 - [ ] Tag de version + release GitHub
 
 ---

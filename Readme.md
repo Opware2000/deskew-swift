@@ -66,6 +66,30 @@ Tests/DeskewParityTests/generate_reference.sh              # → Tests/DeskewPar
 
 Détails : [`Tests/DeskewParityTests/README.md`](Tests/DeskewParityTests/README.md).
 
+## Compilation et utilisation (Swift)
+
+Prérequis : macOS avec **Swift ≥ 5.9** (Xcode 15+). Si la commande `swift` du PATH
+est plus ancienne, utiliser `xcrun swift` ou `Scripts/build_swift_release.sh`.
+
+```bash
+# Compiler l'exécutable (release)
+Scripts/build_swift_release.sh
+# ou : xcrun swift build -c release
+
+# Lancer les tests de parité (release, quelques secondes)
+xcrun swift test -c release
+
+# Utilisation
+./.build/release/deskew -o sortie.png entree.png
+./.build/release/deskew -q lanczos -a 10 -o sortie.png entree.png
+./.build/release/deskew -g d -s sp entree.png     # détection seule + stats
+```
+
+Options identiques à l'original (`-o -a -b -q -d -t -m -r -f -p -l -g -s -c`).
+
+> Les tests en mode debug sont lents (cas de stress `cubic` sur une grande image) :
+> privilégier `swift test -c release`.
+
 ## Utilisation de l'original (rappel)
 
 ```console
