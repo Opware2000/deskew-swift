@@ -41,4 +41,17 @@ public enum TiffCompression: String, CaseIterable, Equatable, Sendable {
         default: return nil
         }
     }
+
+    /// Depuis la valeur du tag TIFF `Compression`.
+    public static func fromTagValue(_ value: Int) -> TiffCompression? {
+        switch value {
+        case 1: return .none
+        case 5: return .lzw
+        case 32773: return .rle
+        case 8, 32946: return .deflate
+        case 7: return .jpeg
+        case 4: return .g4
+        default: return nil
+        }
+    }
 }

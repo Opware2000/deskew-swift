@@ -32,6 +32,7 @@ public struct LoadedImage {
     public let image: PixelImage
     public let format: PixelFormat
     public let resolution: ResolutionInfo
+    public let tiffCompression: TiffCompression?
 
     public var width: Int { image.width }
     public var height: Int { image.height }
@@ -72,21 +73,40 @@ public enum ImageLoader {
         }
 
         let resolution = resolution(from: source)
+        let tiffCompression = tiffCompression(from: source)
 
         // Image monochrome sans alpha : lecture directe en Gray8.
         if cgImage.colorSpace?.model == .monochrome,
            cgImage.alphaInfo == .none || cgImage.alphaInfo == .noneSkipLast || cgImage.alphaInfo == .noneSkipFirst {
             let gray = try drawGray(cgImage, path: path)
-            return LoadedImage(image: .gray(gray), format: .gray8, resolution: resolution)
+            return LoadedImage(image: .gray(gray), format: .gray8,
+                               resolution: resolution, tiffCompression: tiffCompression)
         }
 
         if hasAlphaChannel(cgImage) {
             let rgba = try drawRGBA(cgImage, path: path)
-            return LoadedImage(image: .rgba(rgba), format: .rgba32, resolution: resolution)
+            return LoadedImage(image: .rgba(rgba), format: .rgba32,
+                               resolution: resolution, tiffCompression: tiffCompression)
         } else {
             let rgb = try drawRGB(cgImage, path: path)
-            return LoadedImage(image: .rgb(rgb), format: .rgb24, resolution: resolution)
+            return LoadedImage(image: .rgb(rgb), format: .rgb24,
+                               resolution: resolution, tiffCompression: tiffCompression)
         }
+    }
+
+    /// Compression TIFF de l'image source (pour l'option `tinput`).
+    private static func tiffCompression(from source: CGImageSource) -> TiffCompression? {
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
+            return nil
+        }
+        if let tiff = properties[kCGImagePropertyTIFFDictionary] as? [CFString: Any],
+           let value = tiff[kCGImagePropertyTIFFCompression] as? Int {
+            return TiffCompression.fromTagValue(value)
+        }
+        if let value = properties[kCGImagePropertyTIFFCompression] as? Int {
+            return TiffCompression.fromTagValue(value)
+        }
+        return nil
     }
 
     // MARK: - Helpers

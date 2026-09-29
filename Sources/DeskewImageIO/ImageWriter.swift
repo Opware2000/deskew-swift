@@ -58,10 +58,20 @@ public enum ImageWriter {
                                space: CGColorSpaceCreateDeviceRGB(),
                                bitmapInfo: CGImageAlphaInfo.none.rawValue)
         case .rgba(let rgba):
-            return makeCGImage(pixels: rgba.pixels, width: rgba.width, height: rgba.height,
+            // Notre buffer est B,G,R,A (comme TColor32Rec) ; CGImage avec
+            // alphaInfo `.last` + big-endian attend R,G,B,A.
+            var ordered = [UInt8](repeating: 0, count: rgba.pixels.count)
+            for i in 0..<(rgba.width * rgba.height) {
+                let s = i * 4
+                ordered[s] = rgba.pixels[s + 2]     // R
+                ordered[s + 1] = rgba.pixels[s + 1] // G
+                ordered[s + 2] = rgba.pixels[s]     // B
+                ordered[s + 3] = rgba.pixels[s + 3] // A
+            }
+            return makeCGImage(pixels: ordered, width: rgba.width, height: rgba.height,
                                bitsPerPixel: 32, bytesPerRow: rgba.width * 4,
                                space: CGColorSpaceCreateDeviceRGB(),
-                               bitmapInfo: CGImageAlphaInfo.last.rawValue)
+                               bitmapInfo: CGImageAlphaInfo.last.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
         }
     }
 

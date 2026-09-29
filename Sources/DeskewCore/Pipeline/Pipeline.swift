@@ -28,13 +28,16 @@ public struct PipelineResult {
     public var skewAngle: Double
     public var stats: SkewStats
     public var log: [String]
+    /// Compression TIFF effective (après résolution de `input`).
+    public var resolvedTiffCompression: TiffCompression?
 }
 
 /// Orchestration du traitement (équivalent de `DoDeskew`).
 public enum Pipeline {
 
     public static func run(input: PixelImage, resolution: ResolutionInfo,
-                           options: DeskewOptions) throws -> PipelineResult {
+                           options: DeskewOptions,
+                           inputTiffCompression: TiffCompression? = nil) throws -> PipelineResult {
         let workingGray = input.toGray()
 
         var effectiveResolution = resolution
@@ -77,7 +80,17 @@ public enum Pipeline {
         }
 
         var result = PipelineResult(outputImage: nil, workImage: nil, changed: false,
-                                    skewAngle: detection.angle, stats: detection.stats, log: log)
+                                    skewAngle: detection.angle, stats: detection.stats, log: log,
+                                    resolvedTiffCompression: nil)
+
+        // Compression TIFF effective (option `input` reprise des métadonnées).
+        let effectiveTiffCompression: TiffCompression?
+        if options.tiffCompression == .input {
+            effectiveTiffCompression = inputTiffCompression
+        } else {
+            effectiveTiffCompression = options.tiffCompression
+        }
+        result.resolvedTiffCompression = effectiveTiffCompression
 
         if options.saveWorkImage {
             var work = workingGray
@@ -111,7 +124,7 @@ public enum Pipeline {
         }
 
         // Compression TIFF G4 => image binaire.
-        if options.tiffCompression == .g4, let current = output, current.format != .binary {
+        if effectiveTiffCompression == .g4, let current = output, current.format != .binary {
             output = current.converted(to: .binary)
             result.changed = true
         }

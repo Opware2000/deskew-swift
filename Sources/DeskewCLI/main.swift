@@ -87,7 +87,8 @@ print("Preparing input image (\(FilePath.fileName(inputName)) [\(loaded.width)x\
 
 let result: PipelineResult
 do {
-    result = try Pipeline.run(input: loaded.image, resolution: loaded.resolution, options: options)
+    result = try Pipeline.run(input: loaded.image, resolution: loaded.resolution,
+                              options: options, inputTiffCompression: loaded.tiffCompression)
 } catch {
     print("")
     print(error)
@@ -124,7 +125,7 @@ if !directory.isEmpty {
 let sameExtension = FilePath.fileExt(inputName).lowercased() == FilePath.fileExt(outputName).lowercased()
 if result.changed || !sameExtension {
     let writeOptions = ImageWriteOptions(jpegQuality: options.jpegCompressionQuality,
-                                         tiffCompression: options.tiffCompression,
+                                         tiffCompression: result.resolvedTiffCompression,
                                          resolution: loaded.resolution)
     do {
         try ImageWriter.save(outputImage, to: outputName, options: writeOptions)

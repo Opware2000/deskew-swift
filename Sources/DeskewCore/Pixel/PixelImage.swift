@@ -70,13 +70,26 @@ public enum PixelImage {
         }
     }
 
-    /// Conversion vers un format de sortie. Les formats `binary`/`index8` ne
-    /// sont pas encore produits (approximés par Gray8/RGB24).
+    /// Conversion vers un format de sortie.
+    ///
+    /// `binary` applique le seuillage d'Imaging (`> 128 → 255`, sinon `0`) et
+    /// est stocké en Gray8 (le rendu 1 bit réel n'est pas nécessaire pour la
+    /// comparaison pixel). `index8` est approximé par Gray8/RGB24.
     public func converted(to target: PixelFormat) -> PixelImage {
         switch target {
-        case .gray8, .binary, .index8:
-            if case .gray = self, target == .gray8 { return self }
+        case .gray8:
+            if case .gray = self { return self }
             return .gray(toGray())
+
+        case .binary:
+            var gray = toGray()
+            for i in 0..<gray.pixels.count {
+                gray.pixels[i] = gray.pixels[i] > 128 ? 255 : 0
+            }
+            return .gray(gray)
+
+        case .index8:
+            return converted(to: .rgb24)
 
         case .rgb24:
             switch self {
