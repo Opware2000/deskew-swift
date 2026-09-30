@@ -24,6 +24,10 @@ Toutes les évolutions notables de **deskew-swift**, la réimplémentation en Sw
   signature d'API inexacte et à `Accelerate`).
 - Nouveau test pour `--version` / `-V` ; l'image de stress est exclue des tests en
   mode debug (exécutée en release et en intégration continue).
+- **Nettoyage du dépôt** : suppression des artefacts binaires Windows
+  (`Imaging/LibTiff/Compiled`, 2,6 Mo), de l'interface graphique Pascal (`Gui/`), des
+  tests Pascal et des workflows CI hérités (qui compilaient l'upstream à chaque push).
+  Le code Pascal restant ne sert que d'**oracle de parité**.
 
 ---
 

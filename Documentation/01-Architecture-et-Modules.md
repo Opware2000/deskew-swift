@@ -110,7 +110,7 @@ flowchart TD
 | `ImagingTypes.pas` (couleurs, formats) | `DeskewCore.Pixel` (`GrayImage`, `RGBImage`, `RGBAImage`) | Types |
 | `Imaging.pas` (I/O, métadonnées) | `DeskewImageIO` (ImageIO/CoreGraphics) | Entrées-sorties |
 | `ImagingFormats.pas` (filtres) | `DeskewCore.Resampling` | Algorithme pur |
-| `Gui/` | hors périmètre | — |
+| `Gui/` (interface graphique Pascal) | *(retiré du dépôt — upstream uniquement)* | — |
 
 ## 5. Dépendances entre modules (sens des appels)
 

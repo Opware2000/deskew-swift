@@ -170,7 +170,7 @@ Légende cible :
 
 | Élément | Raison |
 | ------- | ------ |
-| `Gui/` (formulaires, runner, config) | pas d'interface graphique en v1 |
+| Interface graphique (`Gui/` Pascal) | retirée du dépôt (upstream uniquement) |
 | `Imaging/JpegLib/*`, `Imaging/ZLib/*` | codecs remplacés par ImageIO |
 | `Imaging/LibTiff/*` | remplacé par ImageIO pour TIFF |
 | `Imaging/ImagingWic.pas`, `ImagingQuartz.pas` | spécifique plateforme, remplacé |

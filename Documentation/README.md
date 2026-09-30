@@ -15,7 +15,7 @@ algorithmes** (parité des résultats) tout en profitant de :
 
 | Inclus dans la réimplémentation | Exclu (hors périmètre v1) |
 | ------------------------------- | ------------------------- |
-| Détection d'inclinaison (transformée de Hough) | Interface graphique (`Gui/`) |
+| Détection d'inclinaison (transformée de Hough) | Interface graphique (non portée) |
 | Seuillage automatique (Otsu) et binarisation | Bibliothèque Vampyre Imaging (`Imaging/`) réécrite telle quelle |
 | Rotation d'image + rééchantillonnage (nearest/linear/cubic/lanczos) | Codecs tiers embarqués (ZLib, JPEG, LibTIFF, JNG, QOI…) |
 | Analyse de la ligne de commande | Formats propriétaires exotiques (DDS, TGA, PPM, PGM, PAM, PFM, JNG, PSD) |

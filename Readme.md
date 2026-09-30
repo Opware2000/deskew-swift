@@ -39,16 +39,21 @@ Journal des versions : [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Organisation du dépôt
 
-| Chemin | Contenu |
-| ------ | ------- |
-| `Documentation/` | **Documentation de réimplémentation** (algorithmes, CLI, cible Swift, tests) |
-| `Tests/DeskewParityTests/` | Golden files (références) produits par le binaire Pascal |
-| `RotationDetector.pas` | Code Pascal d'origine : détection d'inclinaison (Hough) |
-| `ImageUtils.pas` | Code Pascal d'origine : Otsu, binarisation, rotation |
-| `CmdLineOptions.pas`, `MainUnit.pas`, `Utils.pas` | Code Pascal d'origine : CLI et orchestration |
-| `Imaging/` | Bibliothèque tierce Vampyre Imaging (code du projet original) |
-| `TestImages/` | Images de test |
-| `Scripts/compile_local.sh` | Compile l'oracle Pascal (v1.33) en local |
+**Le produit est en Swift** (`Sources/`). Le code **Pascal** conservé à la racine n'est
+que l'**oracle de parité** : il sert à régénérer les fichiers de référence
+(`Tests/DeskewParityTests/`). Il n'est pas nécessaire pour compiler ou utiliser
+l'outil Swift.
+
+| Chemin | Contenu | Rôle |
+| ------ | ------- | ---- |
+| `Sources/` | Code **Swift** (`DeskewCore`, `DeskewImageIO`, `DeskewCLI`) | **produit** |
+| `Tests/DeskewCoreTests/` | Tests Swift (unitaires, parité, sécurité, fuzz) | produit |
+| `Tests/DeskewParityTests/` | Golden files + scripts de génération | référence |
+| `Documentation/` | Documentation de réimplémentation | doc |
+| `TestImages/` | Images de test | tests |
+| `RotationDetector.pas`, `ImageUtils.pas`, `CmdLineOptions.pas`, `MainUnit.pas`, `Utils.pas` | Sources Pascal d'origine | **oracle** |
+| `Imaging/` | Bibliothèque tierce Vampyre Imaging (pour compiler l'oracle) | oracle |
+| `Scripts/compile_local.sh` | Compile l'oracle Pascal (v1.33) en local | oracle |
 
 La documentation de démarrage se trouve dans
 [`Documentation/README.md`](Documentation/README.md).
