@@ -86,6 +86,9 @@ brew install --formula ./Formula/deskew-swift.rb
 ### Compilation depuis les sources
 
 ```bash
+# Optionnel : contrôle exact de la compression TIFF (LZW, RLE, Deflate, JPEG, G4)
+brew install libtiff
+
 # Compiler l'exécutable (release, binaire universel arm64 + x86_64)
 Scripts/build_swift_release.sh
 # ou : xcrun swift build -c release

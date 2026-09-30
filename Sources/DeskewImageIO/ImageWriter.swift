@@ -44,6 +44,12 @@ public enum ImageWriter {
         uti(forExtension: FilePath.fileExt(path)) != nil
     }
 
+    /// Compression TIFF par défaut (comme l'original) : 1 bit → G4, sinon LZW.
+    private static func defaultTiffCompression(for image: PixelImage) -> TiffCompression {
+        if case .binary = image { return .g4 }
+        return .lzw
+    }
+
     /// Construit un `CGImage` à partir d'une image de travail.
     public static func makeCGImage(_ image: PixelImage) -> CGImage? {
         switch image {
@@ -98,6 +104,20 @@ public enum ImageWriter {
 
     /// Enregistre une image dans un fichier.
     public static func save(_ image: PixelImage, to path: String, options: ImageWriteOptions) throws {
+        let ext = FilePath.fileExt(path).lowercased()
+
+        // TIFF : utiliser libtiff si disponible, pour un contrôle exact de la
+        // compression (LZW, RLE, Deflate, JPEG, G4) qu'ImageIO n'offre pas.
+        // Compression par défaut comme l'original : 1 bit -> G4, sinon LZW.
+        if ext == "tif" || ext == "tiff" {
+            let compression = options.tiffCompression ?? defaultTiffCompression(for: image)
+            if TiffWriter.canWrite(image, compression: compression) {
+                let dpi = options.resolution.physicalPixelSize(.dpi)
+                try TiffWriter.save(image, to: path, compression: compression, dpi: dpi)
+                return
+            }
+        }
+
         guard let uti = uti(forExtension: FilePath.fileExt(path)) else {
             throw ImageIOError.cannotWrite(path)
         }

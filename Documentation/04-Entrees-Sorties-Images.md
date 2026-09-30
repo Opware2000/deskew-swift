@@ -158,20 +158,28 @@ Mapping des schémas TIFF (noms CLI → valeur Imaging → valeur TIFF) :
 > (`kCGImagePropertyTIFFCompression`) et de la remapper. Si impossible → message
 > `Could not set TIFF output compression from input, using default.`
 
-### Comportement réel d'ImageIO en écriture (vérifié)
+### Contrôle de compression TIFF : libtiff (chargé dynamiquement)
 
-- **1 bit → G4 automatique** : produire une image **1 bit** (`BinaryImage`) fait
-  écrire par ImageIO un TIFF **CCITT G4** (tag `Compression = 4`). C'est le cas
-  important pour les documents scannés.
-- **Les autres schémas demandés (`lzw`, `rle`, `deflate`) ne sont pas contrôlables** :
-  ImageIO **ignore** la propriété `kCGImagePropertyTIFFCompression` en écriture et
-  choisit lui-même la compression selon le type d'image. On ne peut donc pas
-  reproduire exactement `-c tlzw`/`trle`/`tdeflate` sans un encodeur TIFF dédié
-  (libtiff ou écriture maison) — hors périmètre à ce stade. `tinput` fonctionne pour
-  G4 (via 1 bit).
-- **PNG** : une image 1 bit est écrite en PNG 1 bit (fichiers nettement plus petits).
-- Conséquence : `-f b1` et `-c tg4`/`tinput`(G4) produisent de **vraies images 1 bit**,
-  au format et à la taille attendus.
+ImageIO **n'expose pas** de contrôle d'écriture de la compression TIFF. Pour
+reproduire exactement `-c tlzw|trle|tdeflate|tjpeg|tg4`, la sortie TIFF passe par
+**libtiff**, chargé **dynamiquement** (`dlopen`/`dlsym`) via un petit shim C
+(`Sources/CTiffShim`) — **aucune dépendance de build**.
+
+| libtiff présent | Comportement TIFF |
+| --- | --- |
+| oui (`brew install libtiff`) | compression **exacte** : `none` (1), LZW (5), PackBits/RLE (32773), Deflate (8), JPEG (7), CCITT **G4** (4) |
+| non | repli sur ImageIO : G4 automatique pour le 1 bit ; compression non contrôlée pour les autres schémas |
+
+- **Compression par défaut** (comme l'original) : **1 bit → G4**, sinon **LZW**.
+- **G4** : libtiff attend `Photometric = WhiteIsZero` (0) ; nos bits valent `1 = blanc`,
+  ils sont donc **inversés** avant écriture.
+- libtiff écrit ses diagnostics sur `stderr` ; le shim installe un handler silencieux
+  pour ne pas polluer la sortie console (parité).
+- `Deflate` est écrit avec le codec **Adobe Deflate (8)**, plus largement supporté
+  que l'identifiant « legacy » 32946 (même codec).
+
+> ImageIO reste utilisé pour les autres formats (PNG, JPEG, GIF, BMP) et pour le
+> TIFF lorsque libtiff est absent.
 
 ## 6. Formats de pixels et conversions
 

@@ -11,8 +11,9 @@ let package = Package(
         .executable(name: "deskew", targets: ["DeskewCLI"])
     ],
     targets: [
+        .target(name: "CTiffShim", path: "Sources/CTiffShim", publicHeadersPath: "include"),
         .target(name: "DeskewCore"),
-        .target(name: "DeskewImageIO", dependencies: ["DeskewCore"]),
+        .target(name: "DeskewImageIO", dependencies: ["DeskewCore", "CTiffShim"]),
         .executableTarget(name: "DeskewCLI", dependencies: ["DeskewCore", "DeskewImageIO"]),
         .testTarget(name: "DeskewCoreTests", dependencies: ["DeskewCore", "DeskewImageIO", "DeskewCLI"])
     ]

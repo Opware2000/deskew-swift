@@ -95,10 +95,15 @@ final class FormatParityTests: XCTestCase {
 
             // La profondeur de bits doit toujours correspondre (1 bit pour binaire/G4).
             XCTAssertEqual(produced.bits, golden.bits, "\(testCase.name): profondeur de bits")
-            // La compression TIFF n'est stricte que pour G4 (ImageIO n'expose pas
-            // de contrôle d'écriture pour les autres schémas).
-            if testCase.ext == "tif", golden.compression == 4 {
-                XCTAssertEqual(produced.compression, 4, "\(testCase.name): compression G4")
+            // Compression TIFF : stricte dès que libtiff est disponible (contrôle exact).
+            if testCase.ext == "tif", TiffWriter.isAvailable {
+                // Deflate : 8 (Adobe) et 32946 (legacy) désignent le même codec.
+                let producedCompression = [8, 32946].contains(produced.compression ?? -1)
+                    ? 8 : produced.compression
+                let goldenCompression = [8, 32946].contains(golden.compression ?? -1)
+                    ? 8 : golden.compression
+                XCTAssertEqual(producedCompression, goldenCompression,
+                               "\(testCase.name): compression TIFF")
             }
         }
     }
