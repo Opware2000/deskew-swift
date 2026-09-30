@@ -164,11 +164,14 @@ build release) :
 
 | Cas | Pascal v1.33 (s) | Swift (s) | Gain |
 | --- | --- | --- | --- |
-| Détection 1big.png (4152×6172) | 1,135 | 0,195 | **5,8×** |
-| Rotation cubic 1big.png | 3,600 | 1,183 | **3,0×** |
-| Rotation lanczos 5.png | 0,209 | 0,116 | **1,8×** |
-| Rotation linear 3.png | 0,475 | 0,156 | **3,0×** |
-| Détection F1550.jpg | 0,412 | 0,083 | **5,0×** |
+| Détection 1big.png (4152×6172) | 0,957 | 0,190 | **5,0×** |
+| Rotation cubic 1big.png | 3,012 | 0,818 | **3,7×** |
+| Rotation lanczos 5.png | 0,193 | 0,086 | **2,2×** |
+| Rotation linear 3.png | 0,430 | 0,134 | **3,2×** |
+| Détection F1550.jpg | 0,383 | 0,075 | **5,1×** |
+
+Détail par phase (`-s t`, 2.png) : Hough **14,7 ms vs 259 ms** (17×),
+rotation **6,0 ms vs 57 ms** (9×).
 
 Le gain provient du multithreading (Hough, rotation, histogramme Otsu), de la
 vectorisation des canaux (SIMD) sur cubic/lanczos et de la compilation native
@@ -205,3 +208,187 @@ Scripts/benchmark.sh 5          # tableau ci-dessus
 | Otsu | Histogramme par bandes + fusion entière ; recherche du seuil séquentielle |
 | Binarisation / conversions | Séquentiel par défaut, parallèle seulement si image grande |
 | Petites images | Tout séquentiel (seuil de taille) |
+
+> Le **détail de chaque optimisation** (principe, efficacité, impact mesuré,
+> limites et optimisation rejetée) est en [§10](#10-journal-des-optimisations).
+
+---
+
+## 10. Journal des optimisations
+
+Chaque optimisation est décrite avec son principe, **pourquoi elle est efficace**
+(raisonnement algorithmique ou matériel) et son impact mesuré. Démarche suivie :
+**mesurer d'abord** (instrumentation `-s t`), optimiser le poste dominant, puis
+**re-vérifier la parité** (59 tests) et re-benchmarker.
+
+### 10.1 Multithreading de l'accumulation Hough (partition par angles)
+
+- **Où** : `HoughSkewDetector.detect`.
+- **Principe** : l'accumulateur est indexé `DIndex * AlphaSteps + I`. Pour un pas
+  angulaire `I` donné, on écrit toujours dans la **colonne `I`**. On partitionne donc
+  `[0, AlphaSteps)` entre threads : deux threads ne touchent jamais le même indice.
+- **Pourquoi c'est efficace** : c'est un cas de parallélisme **sans contention** —
+  aucune synchronisation, aucun verrou, aucune fusion. On transforme une boucle
+  `O(pixels_testés × AlphaSteps)` (le poste le plus lourd de la détection) en travail
+  réparti sur tous les cœurs. Sur Apple Silicon, on exploite les cœurs P et E.
+- **Impact** : Hough 259 ms → **14,7 ms** (≈17×) sur 2.png.
+- **Limite** : chaque thread relit la liste des pixels testés (coût mémoire faible
+  car la liste est compacte), et le résultat est **déterministe** (l'accumulateur ne
+  dépend pas de l'ordre des écritures ; la somme des compteurs entiers est
+  associative).
+
+### 10.2 Pré-calcul des `sin`/`cos` (Hough)
+
+- **Où** : `HoughSkewDetector.detect`.
+- **Principe** : `sin(α)` et `cos(α)` ne dépendent que du pas `I`, pas du pixel. On
+  les calcule une fois dans deux tableaux de taille `AlphaSteps`.
+- **Pourquoi c'est efficace** : l'original appelle `SinCos` **pour chaque couple
+  (pixel, angle)** — des centaines de millions d'appels trigonométriques. Les
+  remplacer par deux lectures de tableau supprime tout le coût trigonométrique.
+  Les valeurs sont **identiques** (même angle → même résultat), donc la parité est
+  conservée.
+- **Impact** : combiné à 10.1, contribue au 17× sur la détection.
+
+### 10.3 Pré-collecte des pixels testés (Hough)
+
+- **Où** : `HoughSkewDetector.detect`.
+- **Principe** : on effectue **une seule** passe sur l'image pour construire la liste
+  des pixels « ligne de base » (noir avec pixel du dessous non noir), stockée dans
+  deux tableaux `Int32` `x`/`y`.
+- **Pourquoi c'est efficace** : les threads d'accumulation itèrent ensuite sur cette
+  liste compacte au lieu de rescanner l'image entière. On évite de relire `W×H`
+  pixels `T` fois (T = nombre de cœurs) : le balayage image, coûteux en bande
+  passante mémoire, est fait **une fois**.
+- **Limite** : mémoire `2 × 4 octets × pixels_testés` (quelques Mo au plus).
+
+### 10.4 Garde-fou d'indice (Hough)
+
+- **Où** : `HoughSkewDetector.detect`.
+- **Principe** : `0 ≤ index < AccumulatorSize` avant écriture.
+- **Pourquoi** : ce n'est pas une optimisation de vitesse mais de **robustesse**.
+  L'original suppose implicitement que `DIndex` reste dans les bornes (vrai pour de
+  petits `MaxAngle`) ; sinon il écrit hors du tableau (comportement indéfini). En
+  Swift, un débordement serait une écriture mémoire silencieuse.
+
+### 10.5 Rotation parallèle par bandes de lignes
+
+- **Où** : `ImageRotation.renderParallel`.
+- **Principe** : chaque pixel de destination est indépendant ; on découpe la hauteur
+  en bandes, chaque thread écrivant dans une **région disjointe** du tampon.
+- **Pourquoi c'est efficace** : problème *embarrassingly parallel* — accès source en
+  lecture seule, écritures sans recouvrement → aucun verrou. La rotation
+  (surtout cubic/lanczos, `O(W·H·k²)`) est le poste le plus lourd après la
+  sauvegarde.
+- **Impact** : rotation 57 ms → **6,0 ms** (≈9×) sur 2.png ; `cubic 1big`
+  1,18 s → **0,82 s**.
+- **Limite** : bandes assez hautes pour réutiliser les lignes source voisines dans la
+  fenêtre du noyau (`±k`), et seuil de taille pour ne pas pénaliser les petites
+  images (10.9).
+
+### 10.6 Table de poids partagée (cubic/lanczos)
+
+- **Où** : `KernelTable`, `ImageRotation`.
+- **Principe** : la table de poids (noyau quantifié sur 32 pas) est construite **une
+  fois** avant les bandes, puis lue en lecture seule par tous les threads.
+- **Pourquoi c'est efficace** : sans cela, chaque pixel recalculerait `k²` évaluations
+  de noyau (sinus, polynômes). La table remplace ce calcul par une simple lecture.
+  Partagée en lecture seule → sûre et sans duplication mémoire.
+
+### 10.7 SIMD sur les canaux (cubic/lanczos)
+
+- **Où** : `Sampler.pixelVector`, `ImageRotation.filterPixel`.
+- **Principe** : accumuler `(B, G, R, A)` dans un `SIMD4<Float>` au lieu de quatre
+  scalaires `Float`.
+- **Pourquoi c'est efficace** : ARM64 dispose de registres SIMD (NEON) ; une
+  multiplication-accumulation vectorielle traite les 4 canaux en une instruction au
+  lieu de quatre. Le noyau étant appliqué `k²` fois par pixel, le gain est multiplié
+  par le nombre de taps.
+- **Limite** : l'ordre d'accumulation reste identique au scalaire → résultats
+  bit-identiques (parité préservée).
+
+### 10.8 Allocation non initialisée des destinations de rotation
+
+- **Où** : `GrayImage/RGBImage/RGBAImage.init(uninitializedWidth:height:)`,
+  utilisés dans `ImageRotation` et `PixelImage.toGray`.
+- **Principe** : `[UInt8](repeating: 0, count: n)` **met à zéro** tout le tampon ; or
+  la boucle de rendu écrit **ensuite chaque pixel**. On alloue donc sans
+  initialisation (`Array(unsafeUninitializedCapacity:)`).
+- **Pourquoi c'est efficace** : on supprime une écriture mémoire complète inutile.
+  Pour une destination `4300×6271` en gris (≈27 Mo) ou RGBA (≈108 Mo), c'est un
+  passage mémoire évité.
+- **Impact** : contribue au passage de `cubic 1big` à 0,82 s.
+- **Condition de sûreté** : le tampon doit être **intégralement écrit** avant
+  lecture — vrai pour la boucle de rendu (toutes les bandes couvrent toute l'image).
+
+### 10.9 Seuil de taille (éviter le surcoût de dispatch)
+
+- **Où** : `ImageRotation.parallelThreshold`, `Otsu.computeHistogram`,
+  `HoughSkewDetector` (nombre de threads borné).
+- **Principe** : en dessous d'un seuil (≈100–200 k pixels), rester séquentiel.
+- **Pourquoi c'est efficace** : `DispatchQueue.concurrentPerform` a un coût fixe
+  (réveil de threads, répartition). Sur une petite image, ce coût dépasse le travail
+  économisé → le parallélisme *ralentit*. Le seuil garantit qu'on ne parallélise que
+  quand le gain marginal est positif.
+
+### 10.10 Histogramme Otsu par bandes + fusion déterministe
+
+- **Où** : `Otsu.computeHistogram`.
+- **Principe** : chaque bande de lignes calcule un histogramme local (`256` `Float`) ;
+  on fusionne dans l'ordre des bandes. La recherche du seuil reste séquentielle
+  (`O(256²)` négligeable).
+- **Pourquoi c'est efficace** : l'histogramme est `O(W·H)` (lecture de chaque pixel) ;
+  le répartir divise ce balayage par le nombre de cœurs. La fusion est
+  **déterministe** car les compteurs sont des entiers stockés en `Float` (exacts
+  < 2²⁴) : la somme ne dépend pas de l'ordre → résultat identique au séquentiel.
+- **Impact** : Auto thresholding 13,5 ms → **1,2 ms** sur 2.png.
+
+### 10.11 Conversion en niveaux de gris sur tampons plats
+
+- **Où** : `PixelImage.toGray`.
+- **Principe** : itérer sur `withUnsafeBufferPointer`/`withUnsafeMutableBufferPointer`
+  au lieu de `image[x, y]`.
+- **Pourquoi c'est efficace** : le subscript Swift effectue un **contrôle de bornes**
+  et un calcul d'indice par accès ; en boucle chaude sur des millions de pixels, ce
+  surcoût est réel. Les pointeurs plats suppriment le contrôle de bornes **sans**
+  désactiver la sécurité globale du programme.
+
+### 10.12 Build release et inlining
+
+- **Où** : `Scripts/build_swift_release.sh`, `Package.swift`.
+- **Principe** : compilation `-c release` (optimisations + *whole-module
+  optimization*), `@inline(__always)` sur les accesseurs chauds
+  (`Sampler.pixel`, `pixelVector`, `KernelTable.weight`, `sourceCoordinates`).
+- **Pourquoi c'est efficace** : l'inlining supprime l'appel de fonction par pixel et
+  permet au compilateur de propager les constantes et de vectoriser. En WMO, le
+  compilateur voit tout le module et peut spécialiser les closures non échappantes.
+
+### 10.13 Instrumentation `-s t` (mesurer avant d'optimiser)
+
+- **Où** : `Stopwatch`, `Pipeline`, `DeskewCLI`.
+- **Principe** : lignes de timing par phase (`Load`, `Auto thresholding`,
+  `Skew detection`, `Rotate image`, `Save output file`), au format exact de
+  l'original.
+- **Pourquoi c'est efficace** : on ne devine pas le poste dominant — on le mesure.
+  C'est ce qui a permis de cibler la rotation, puis de **rejeter** une optimisation
+  (10.14). Accessoirement, `-s t` comble un écart de parité avec l'original.
+
+### 10.14 Optimisation rejetée : tampons non initialisés dans `ImageLoader`
+
+- **Principe tenté** : appliquer 10.8 aux tampons du loader.
+- **Résultat** : **parité RGBA cassée** (écart max 191).
+- **Cause** : `CGContext.draw` **composite** l'image sur le contenu existant du
+  contexte ; avec un tampon non initialisé, les zones semi-transparentes mélangent
+  l'image et des octets aléatoires. Le zéro est donc **requis** ici.
+- **Leçon** : une optimisation mémoire n'est valide que si le tampon est réellement
+  écrit en totalité. Mesurer, vérifier la parité, revenir en arrière si nécessaire —
+  ne jamais optimiser à l'aveugle.
+
+### 10.15 Pistes non retenues (à ce stade)
+
+| Piste | Raison |
+| --- | --- |
+| Supprimer la closure `write` par pixel | gain incertain (WMO inline déjà la closure non échappante) |
+| Spécialiser les noyaux par format (sortir le `switch`) | branche bien prédite ; gain à mesurer |
+| Accélérer l'encodage PNG | contrôlé par ImageIO (zlib système), peu de leviers |
+| `-Ounchecked` | rejeté : masque les débordements, change la sémantique |
+
