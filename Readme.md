@@ -80,8 +80,8 @@ est plus ancienne, utiliser `xcrun swift` ou `Scripts/build_swift_release.sh`.
 curl -L -o deskew https://github.com/Opware2000/deskew-swift/releases/download/v0.4.0/deskew-macos-universal
 chmod +x deskew && sudo mv deskew /usr/local/bin/
 
-# Homebrew (formule locale, sans tap)
-brew install --formula ./Formula/deskew-swift.rb
+# Homebrew (tap)
+brew install Opware2000/tap/deskew-swift
 ```
 
 ### Compilation depuis les sources

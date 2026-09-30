@@ -84,6 +84,15 @@ Messages **en français**, format **Conventional Commits**, emoji de type en tê
 Scopes recommandés : `core`, `options`, `rotation`, `skew`, `io`, `pipeline`, `cli`,
 `ci`, `docs`, `todo`.
 
+## Publier une version
+
+1. Mettre à jour `DeskewVersion.port` et `CHANGELOG.md`.
+2. Taguer et créer la release avec le binaire universel :
+   `Scripts/build_swift_release.sh` puis `gh release create vX.Y.Z .build/.../deskew`.
+3. Mettre à jour la formule Homebrew dans le **tap**
+   [`Opware2000/homebrew-tap`](https://github.com/Opware2000/homebrew-tap)
+   (URL de la nouvelle release + `sha256`).
+
 ## Workflow
 
 1. Créer une branche (`feat/…`, `fix/…`).
