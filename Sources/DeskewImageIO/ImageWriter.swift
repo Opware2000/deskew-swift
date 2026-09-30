@@ -47,6 +47,15 @@ public enum ImageWriter {
     /// Construit un `CGImage` à partir d'une image de travail.
     public static func makeCGImage(_ image: PixelImage) -> CGImage? {
         switch image {
+        case .binary(let binary):
+            // Vraie image 1 bit : ImageIO écrit alors un TIFF G4 et un PNG 1 bit.
+            guard let provider = CGDataProvider(data: Data(binary.bits) as CFData) else { return nil }
+            return CGImage(width: binary.width, height: binary.height,
+                           bitsPerComponent: 1, bitsPerPixel: 1,
+                           bytesPerRow: binary.bytesPerRow, space: CGColorSpaceCreateDeviceGray(),
+                           bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                           provider: provider, decode: nil, shouldInterpolate: false,
+                           intent: .defaultIntent)
         case .gray(let gray):
             return makeCGImage(pixels: gray.pixels, width: gray.width, height: gray.height,
                                bitsPerPixel: 8, bytesPerRow: gray.width,

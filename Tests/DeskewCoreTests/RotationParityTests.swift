@@ -42,6 +42,14 @@ final class RotationParityTests: XCTestCase {
     /// Buffer RGBA **prémultiplié** (les zones transparentes sont normalisées).
     private func rgbaBuffer(_ image: PixelImage) -> (Int, Int, [UInt8]) {
         switch image {
+        case .binary(let binary):
+            let gray = binary.toGray()
+            var out = [UInt8](repeating: 0, count: gray.width * gray.height * 4)
+            for i in 0..<(gray.width * gray.height) {
+                let v = gray.pixels[i]
+                out[i * 4] = v; out[i * 4 + 1] = v; out[i * 4 + 2] = v; out[i * 4 + 3] = 255
+            }
+            return (gray.width, gray.height, out)
         case .gray(let gray):
             var out = [UInt8](repeating: 0, count: gray.width * gray.height * 4)
             for i in 0..<(gray.width * gray.height) {

@@ -27,6 +27,14 @@ final class ImageIOTests: XCTestCase {
     /// Buffer RGBA prémultiplié, pour comparer des images de formats différents.
     private func rgba(_ image: PixelImage) -> (Int, Int, [UInt8]) {
         switch image {
+        case .binary(let binary):
+            let gray = binary.toGray()
+            var out = [UInt8](repeating: 0, count: gray.width * gray.height * 4)
+            for i in 0..<(gray.width * gray.height) {
+                let v = gray.pixels[i]
+                out[i * 4] = v; out[i * 4 + 1] = v; out[i * 4 + 2] = v; out[i * 4 + 3] = 255
+            }
+            return (gray.width, gray.height, out)
         case .gray(let g):
             var out = [UInt8](repeating: 0, count: g.width * g.height * 4)
             for i in 0..<(g.width * g.height) {

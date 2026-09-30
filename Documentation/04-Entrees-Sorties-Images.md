@@ -158,6 +158,21 @@ Mapping des schémas TIFF (noms CLI → valeur Imaging → valeur TIFF) :
 > (`kCGImagePropertyTIFFCompression`) et de la remapper. Si impossible → message
 > `Could not set TIFF output compression from input, using default.`
 
+### Comportement réel d'ImageIO en écriture (vérifié)
+
+- **1 bit → G4 automatique** : produire une image **1 bit** (`BinaryImage`) fait
+  écrire par ImageIO un TIFF **CCITT G4** (tag `Compression = 4`). C'est le cas
+  important pour les documents scannés.
+- **Les autres schémas demandés (`lzw`, `rle`, `deflate`) ne sont pas contrôlables** :
+  ImageIO **ignore** la propriété `kCGImagePropertyTIFFCompression` en écriture et
+  choisit lui-même la compression selon le type d'image. On ne peut donc pas
+  reproduire exactement `-c tlzw`/`trle`/`tdeflate` sans un encodeur TIFF dédié
+  (libtiff ou écriture maison) — hors périmètre à ce stade. `tinput` fonctionne pour
+  G4 (via 1 bit).
+- **PNG** : une image 1 bit est écrite en PNG 1 bit (fichiers nettement plus petits).
+- Conséquence : `-f b1` et `-c tg4`/`tinput`(G4) produisent de **vraies images 1 bit**,
+  au format et à la taille attendus.
+
 ## 6. Formats de pixels et conversions
 
 ### 6.1 Formats de travail
@@ -210,6 +225,10 @@ avec les ajustements liés à la couleur de fond).
 Appliqué **juste avant sauvegarde**. Cas particulier : `-f b1` (binaire) accepté même
 si la rotation a introduit des niveaux de gris (l'utilisateur l'a demandé
 explicitement). `g4` force automatiquement `ifBinary`.
+
+`-f b1` et `-c tg4` produisent une **vraie image 1 bit** (`BinaryImage`, bits
+empaquetés, `1` = blanc) : seuillage d'Imaging `> 128 → blanc`, comme `EncodeBinary`.
+Le TIFF résultant est en G4 (cf. §5).
 
 ## 7. Copie « sans changement »
 

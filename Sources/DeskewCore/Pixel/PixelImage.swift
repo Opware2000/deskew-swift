@@ -10,12 +10,14 @@ public enum PixelImage {
     case gray(GrayImage)
     case rgb(RGBImage)
     case rgba(RGBAImage)
+    case binary(BinaryImage)
 
     public var width: Int {
         switch self {
         case .gray(let image): return image.width
         case .rgb(let image): return image.width
         case .rgba(let image): return image.width
+        case .binary(let image): return image.width
         }
     }
 
@@ -24,6 +26,7 @@ public enum PixelImage {
         case .gray(let image): return image.height
         case .rgb(let image): return image.height
         case .rgba(let image): return image.height
+        case .binary(let image): return image.height
         }
     }
 
@@ -32,6 +35,7 @@ public enum PixelImage {
         case .gray: return .gray8
         case .rgb: return .rgb24
         case .rgba: return .rgba32
+        case .binary: return .binary
         }
     }
 
@@ -49,6 +53,8 @@ public enum PixelImage {
         switch self {
         case .gray(let image):
             return image
+        case .binary(let image):
+            return image.toGray()
         case .rgb(let image):
             var gray = GrayImage(uninitializedWidth: image.width, height: image.height)
             image.pixels.withUnsafeBufferPointer { src in
@@ -82,9 +88,8 @@ public enum PixelImage {
 
     /// Conversion vers un format de sortie.
     ///
-    /// `binary` applique le seuillage d'Imaging (`> 128 → 255`, sinon `0`) et
-    /// est stocké en Gray8 (le rendu 1 bit réel n'est pas nécessaire pour la
-    /// comparaison pixel). `index8` est approximé par Gray8/RGB24.
+    /// `binary` produit une **vraie image 1 bit** (seuillage d'Imaging
+    /// `> 128 → blanc`). `index8` est approximé par RGB24.
     public func converted(to target: PixelFormat) -> PixelImage {
         switch target {
         case .gray8:
@@ -92,11 +97,8 @@ public enum PixelImage {
             return .gray(toGray())
 
         case .binary:
-            var gray = toGray()
-            for i in 0..<gray.pixels.count {
-                gray.pixels[i] = gray.pixels[i] > 128 ? 255 : 0
-            }
-            return .gray(gray)
+            if case .binary = self { return self }
+            return .binary(BinaryImage.fromGray(toGray()))
 
         case .index8:
             return converted(to: .rgb24)
@@ -122,6 +124,8 @@ public enum PixelImage {
                     }
                 }
                 return .rgb(rgb)
+            case .binary:
+                return converted(to: .gray8).converted(to: .rgb24)
             }
 
         case .rgba32:
@@ -145,13 +149,20 @@ public enum PixelImage {
                     }
                 }
                 return .rgba(rgba)
+            case .binary:
+                return converted(to: .gray8).converted(to: .rgba32)
             }
         }
     }
 
     /// Équivalent de `EnsurePixelFormatForRotation`.
+    ///
+    /// `ifBinary` est ramené à Gray8 (comme l'original).
     public func ensureRotatable(background: RGBA32) -> PixelImage {
         var image = self
+        if case .binary = image {
+            image = image.converted(to: .gray8)
+        }
         if background.a != 255 {
             image = image.converted(to: .rgba32)
         } else if case .gray = image, !background.isGray {
@@ -176,6 +187,11 @@ public enum PixelImage {
             ImageRotation.rotate(&image, angleDegrees: angleDegrees, background: background,
                                  filter: filter, fitRotated: fitRotated)
             return .rgba(image)
+        case .binary:
+            // Ne devrait pas arriver : `ensureRotatable` convertit le binaire en gris.
+            return ensureRotatable(background: background)
+                .rotated(angleDegrees: angleDegrees, background: background,
+                         filter: filter, fitRotated: fitRotated)
         }
     }
 }

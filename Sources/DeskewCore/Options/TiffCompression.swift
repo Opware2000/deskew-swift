@@ -33,7 +33,7 @@ public enum TiffCompression: String, CaseIterable, Equatable, Sendable {
     /// Noms utilisés par la bibliothèque Imaging (pour `TrySetTiffCompressionFromMetadata`).
     public static func fromMetadataName(_ name: String) -> TiffCompression? {
         switch name {
-        case "None": return .none
+        case "None": return TiffCompression.none
         case "LZW": return .lzw
         case "JPEG": return .jpeg
         case "Deflate": return .deflate
