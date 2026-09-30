@@ -51,19 +51,29 @@ public enum PixelImage {
             return image
         case .rgb(let image):
             var gray = GrayImage(width: image.width, height: image.height)
-            for y in 0..<image.height {
-                for x in 0..<image.width {
-                    let pixel = image[x, y]
-                    gray[x, y] = PixelImage.luminance(r: pixel.r, g: pixel.g, b: pixel.b)
+            image.pixels.withUnsafeBufferPointer { src in
+                gray.pixels.withUnsafeMutableBufferPointer { dst in
+                    var s = 0
+                    var d = 0
+                    while s < src.count {
+                        dst[d] = PixelImage.luminance(r: src[s], g: src[s + 1], b: src[s + 2])
+                        s += 3
+                        d += 1
+                    }
                 }
             }
             return gray
         case .rgba(let image):
             var gray = GrayImage(width: image.width, height: image.height)
-            for y in 0..<image.height {
-                for x in 0..<image.width {
-                    let pixel = image[x, y]
-                    gray[x, y] = PixelImage.luminance(r: pixel.r, g: pixel.g, b: pixel.b)
+            image.pixels.withUnsafeBufferPointer { src in
+                gray.pixels.withUnsafeMutableBufferPointer { dst in
+                    var s = 0
+                    var d = 0
+                    while s < src.count {
+                        dst[d] = PixelImage.luminance(r: src[s + 2], g: src[s + 1], b: src[s])
+                        s += 4
+                        d += 1
+                    }
                 }
             }
             return gray

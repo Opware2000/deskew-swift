@@ -157,18 +157,31 @@ filtre et de `KernelWidth`.
 - Nombre de workers : `ProcessInfo.processInfo.activeProcessorCount` (borne par le
   nombre de cœurs disponibles, cohérent avec les Mac Apple Silicon P/E cores).
 
-## 7. Repères de performance (ordres de grandeur)
+## 7. Benchmarks
 
-À mesurer et documenter lors de l'implémentation :
+Comparaison `Scripts/benchmark.sh` (meilleur de 5 essais, Apple Silicon arm64,
+build release) :
 
-| Scénario | Pascal (x86) | Swift arm64 cible |
-| -------- | ------------ | ----------------- |
-| Détection Hough 3000×4000, `-a 10 -d 0.1` | référence | à mesurer |
-| Rotation lanczos 3000×4000 | référence | à mesurer |
-| Otsu 3000×4000 | référence | à mesurer |
+| Cas | Pascal v1.33 (s) | Swift (s) | Gain |
+| --- | --- | --- | --- |
+| Détection 1big.png (4152×6172) | 1,135 | 0,195 | **5,8×** |
+| Rotation cubic 1big.png | 3,600 | 1,183 | **3,0×** |
+| Rotation lanczos 5.png | 0,209 | 0,116 | **1,8×** |
+| Rotation linear 3.png | 0,475 | 0,156 | **3,0×** |
+| Détection F1550.jpg | 0,412 | 0,083 | **5,0×** |
 
-Le binaire Pascal fournit les timings (`-s t`), utile comme base de comparaison. Le
-temps total est aussi influencé par l'I/O d'ImageIO (TIFF lourd).
+Le gain provient du multithreading (Hough, rotation, histogramme Otsu), de la
+vectorisation des canaux (SIMD) sur cubic/lanczos et de la compilation native
+Swift. La détection inclut le décodage ImageIO, la conversion en niveaux de gris
+et Otsu.
+
+Reproduire :
+
+```bash
+Scripts/compile_local.sh        # oracle Pascal (une fois)
+Scripts/benchmark.sh 5          # tableau ci-dessus
+```
+
 
 ## 8. Pièges spécifiques arm64
 

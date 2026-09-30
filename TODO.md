@@ -17,7 +17,7 @@ Liste des tâches, dérivée de
 | 5 | Détection d'inclinaison (Hough) | 🟢 |
 | 6 | Entrées-sorties ImageIO | 🟢 |
 | 7 | Pipeline et exécutable | 🟢 |
-| 8 | Multithreading et performance | 🟡 |
+| 8 | Multithreading et performance | 🟢 |
 | 9 | Packaging et release | 🟡 |
 
 ---
@@ -108,10 +108,10 @@ Liste des tâches, dérivée de
 - [x] Rotation : `concurrentPerform` par bandes de lignes
 - [x] Seuil de taille (pas de parallélisme sur les petites images)
 - [x] Vérifier le déterminisme (48/48 tests verts, résultats identiques)
-- [ ] Otsu : histogramme par bandes
-- [ ] SIMD (`SIMD4<Float>`) sur cubic/lanczos
-- [ ] Benchmarks consignés (release vs Pascal)
-- [ ] Optimiser le décodage/conversion (coût dominant en debug)
+- [x] Otsu : histogramme par bandes (fusion déterministe)
+- [x] SIMD (`SIMD4<Float>`) sur cubic/lanczos
+- [x] Benchmarks consignés (`Scripts/benchmark.sh`, 1,8× à 5,8× vs Pascal)
+- [x] Conversion en niveaux de gris optimisée (buffers plats)
 
 ## Phase 9 — Packaging et release
 

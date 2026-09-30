@@ -47,4 +47,25 @@ struct Sampler {
             return RGBA32(r: bytes[i + 2], g: bytes[i + 1], b: bytes[i], a: bytes[i + 3])
         }
     }
+
+    /// Pixel sous forme vectorielle `(B, G, R, A)` pour l'accumulation SIMD.
+    @inline(__always)
+    func pixelVector(_ x: Int, _ y: Int) -> SIMD4<Float> {
+        guard x >= 0, y >= 0, x < width, y < height else {
+            return SIMD4<Float>(Float(background.b), Float(background.g),
+                                Float(background.r), Float(background.a))
+        }
+        switch kind {
+        case .gray8:
+            let v = Float(bytes[y * width + x])
+            return SIMD4<Float>(v, v, v, 255)
+        case .rgb24:
+            let i = (y * width + x) * 3
+            return SIMD4<Float>(Float(bytes[i]), Float(bytes[i + 1]), Float(bytes[i + 2]), 255)
+        case .rgba32:
+            let i = (y * width + x) * 4
+            return SIMD4<Float>(Float(bytes[i]), Float(bytes[i + 1]),
+                                Float(bytes[i + 2]), Float(bytes[i + 3]))
+        }
+    }
 }

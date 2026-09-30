@@ -324,50 +324,34 @@ public enum ImageRotation {
         let xTablePos = DeskewMath.pascalRound((Float(ceilX) - x) * Float(kernel.maxTablePos))
         let yTablePos = DeskewMath.pascalRound((Float(ceilY) - y) * Float(kernel.maxTablePos))
 
-        var vertB: Float = 0
-        var vertG: Float = 0
-        var vertR: Float = 0
-        var vertA: Float = 0
+        var vert = SIMD4<Float>.zero
 
         if loY <= hiY && loX <= hiX {
             for i in loY...hiY {
                 let weightVert = kernel.weight(i, yTablePos)
                 if weightVert != 0 {
-                    var horzB: Float = 0, horzG: Float = 0, horzR: Float = 0, horzA: Float = 0
+                    var horz = SIMD4<Float>.zero
                     for j in loX...hiX {
-                        let weightHorz = kernel.weight(j, xTablePos)
-                        let pixel = sampler.pixel(ceilX + j, ceilY + i)
-                        horzB += Float(pixel.b) * weightHorz
-                        horzG += Float(pixel.g) * weightHorz
-                        horzR += Float(pixel.r) * weightHorz
-                        horzA += Float(pixel.a) * weightHorz
+                        horz += sampler.pixelVector(ceilX + j, ceilY + i) * kernel.weight(j, xTablePos)
                     }
-                    vertB += horzB * weightVert
-                    vertG += horzG * weightVert
-                    vertR += horzR * weightVert
-                    vertA += horzA * weightVert
+                    vert += horz * weightVert
                 }
             }
         }
 
         if edge {
+            let backgroundVector = SIMD4<Float>(Float(background.b), Float(background.g),
+                                                Float(background.r), Float(background.a))
             for i in -kw...kw {
                 let weightVert = kernel.weight(i, yTablePos)
                 if weightVert != 0 {
-                    var horzB: Float = 0, horzG: Float = 0, horzR: Float = 0, horzA: Float = 0
+                    var horz = SIMD4<Float>.zero
                     for j in -kw...kw {
                         if j < loX || j > hiX || i < loY || i > hiY {
-                            let weightHorz = kernel.weight(j, xTablePos)
-                            horzB += Float(background.b) * weightHorz
-                            horzG += Float(background.g) * weightHorz
-                            horzR += Float(background.r) * weightHorz
-                            horzA += Float(background.a) * weightHorz
+                            horz += backgroundVector * kernel.weight(j, xTablePos)
                         }
                     }
-                    vertB += horzB * weightVert
-                    vertG += horzG * weightVert
-                    vertR += horzR * weightVert
-                    vertA += horzA * weightVert
+                    vert += horz * weightVert
                 }
             }
         }
@@ -375,7 +359,7 @@ public enum ImageRotation {
         func finish(_ value: Float) -> UInt8 {
             DeskewMath.clampToByte(Int(value + 0.5))
         }
-        return RGBA32(r: finish(vertR), g: finish(vertG), b: finish(vertB), a: finish(vertA))
+        return RGBA32(r: finish(vert.z), g: finish(vert.y), b: finish(vert.x), a: finish(vert.w))
     }
 
     // MARK: - Multiples de 90
