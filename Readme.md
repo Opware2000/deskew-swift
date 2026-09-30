@@ -72,6 +72,19 @@ Détails : [`Tests/DeskewParityTests/README.md`](Tests/DeskewParityTests/README.
 Prérequis : macOS avec **Swift ≥ 5.9** (Xcode 15+). Si la commande `swift` du PATH
 est plus ancienne, utiliser `xcrun swift` ou `Scripts/build_swift_release.sh`.
 
+### Installation (binaire, sans compilation)
+
+```bash
+# Téléchargement direct (binaire universel arm64 + x86_64)
+curl -L -o deskew https://github.com/Opware2000/deskew-swift/releases/download/v0.2.0/deskew-macos-universal
+chmod +x deskew && sudo mv deskew /usr/local/bin/
+
+# Homebrew (formule locale, sans tap)
+brew install --formula ./Formula/deskew-swift.rb
+```
+
+### Compilation depuis les sources
+
 ```bash
 # Compiler l'exécutable (release, binaire universel arm64 + x86_64)
 Scripts/build_swift_release.sh
@@ -79,6 +92,9 @@ Scripts/build_swift_release.sh
 
 # Lancer les tests de parité (release, quelques secondes)
 xcrun swift test -c release
+
+# Sanitizers (data races + mémoire)
+Scripts/sanitizers.sh
 
 # Utilisation
 ./.build/release/deskew -o sortie.png entree.png
