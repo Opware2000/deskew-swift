@@ -9,6 +9,38 @@ Toutes les évolutions notables de **deskew-swift**, la réimplémentation en Sw
 
 ---
 
+## v0.4.0 — 30 septembre 2026
+
+### 🐛 Corrections
+
+- **La résolution forcée (`-p`) est maintenant appliquée au fichier de sortie.**
+  Auparavant, `-p 300` était ignoré à l'écriture : le fichier gardait la résolution
+  d'entrée (par exemple 72 dpi), ce qui faussait l'impression et l'archivage.
+- **Plus d'échecs silencieux** : un problème de copie ou d'écriture affiche
+  désormais une erreur et un code de sortie non nul. Auparavant, un échec pouvait
+  afficher « Done! » **sans produire de fichier**.
+
+### 🔧 Améliorations
+
+- **Compression TIFF contrôlée aussi pour les images avec transparence** :
+  `-f rgba32 -c tlzw` (et `trle`, `tdeflate`, `tjpeg`) appliquent bien le schéma
+  demandé.
+- **Mémoire réduite** (~25 % sur les grandes images) : le tampon de sortie n'est plus
+  dupliqué lors de la sauvegarde.
+- **Fichier d'entrée lu une seule fois** (suppression d'une lecture redondante).
+- **Nouvelle option `--version` / `-V`** : affiche la version du port Swift
+  (`deskew-swift 0.4.0 — portage Swift de Deskew 1.33`), sans modifier la sortie par
+  défaut (qui reste identique à l'original).
+
+### Améliorations internes
+
+- L'intégration continue installe **libtiff**, ce qui garantit que la parité de
+  compression TIFF est réellement testée.
+- Limite connue documentée : le 1 bit n'est produit que pour **PNG** et **TIFF**
+  (GIF/BMP restent en 8 bits).
+
+---
+
 ## v0.3.1 — 30 septembre 2026
 
 Release d'hygiène. **Le binaire est identique à la v0.3.0** (même empreinte), aucune
