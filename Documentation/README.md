@@ -35,6 +35,7 @@ algorithmes** (parité des résultats) tout en profitant de :
 | [07-Parite-et-Tests.md](07-Parite-et-Tests.md) | Risques de parité numérique, golden tests, plan de tests |
 | [08-Matrice-de-Tracabilite.md](08-Matrice-de-Tracabilite.md) | Table exhaustive fonction/procédure Pascal → symbole Swift |
 | [09-Plan-Implementation.md](09-Plan-Implementation.md) | Découpage en phases, ordre de travail, critères de sortie |
+| [11-Securite.md](11-Securite.md) | Analyse de sécurité : constats, correctifs, tests de non-régression |
 
 ## Sources de vérité (code analysé)
 

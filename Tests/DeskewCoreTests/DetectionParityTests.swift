@@ -91,7 +91,7 @@ final class DetectionParityTests: XCTestCase {
                 threshold = Otsu.threshold(image: gray, rect: contentRect)
             }
 
-            let result = HoughSkewDetector.detect(
+            let result = try HoughSkewDetector.detect(
                 maxAngle: options.maxAngle,
                 angleStep: options.angleStep,
                 threshold: threshold,

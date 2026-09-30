@@ -30,6 +30,21 @@ public struct SkewDetectionResult: Equatable, Sendable {
     }
 }
 
+/// Erreurs de détection (paramètres non fiables, ressources excessives).
+public enum HoughError: Error, CustomStringConvertible {
+    case invalidParameters
+    case detectionTooLarge
+
+    public var description: String {
+        switch self {
+        case .invalidParameters:
+            return "Invalid skew detection parameters (max angle / angle step)."
+        case .detectionTooLarge:
+            return "Skew detection accumulator too large; reduce max angle or increase angle step."
+        }
+    }
+}
+
 /// Détection d'inclinaison par transformée de Hough.
 ///
 /// Reproduction fidèle de `RotationDetector.CalcRotationAngle`.
@@ -37,6 +52,9 @@ public enum HoughSkewDetector {
 
     /// Nombre de « meilleures » lignes retenues.
     public static let bestLinesCount = 20
+
+    /// Garde-fou mémoire : nombre maximal de cases d'accumulateur.
+    public static let maxAccumulatorSize = 200_000_000
 
     private struct Line {
         var count = 0
@@ -46,8 +64,11 @@ public enum HoughSkewDetector {
     }
 
     /// Calcule l'angle de rotation (en degrés) d'une image Gray8.
+    ///
+    /// - Throws: `HoughError` si les paramètres sont non finis/hors bornes ou si
+    ///   l'accumulateur dépasserait la limite mémoire.
     public static func detect(maxAngle: Double, angleStep: Double, threshold: Int,
-                              image: GrayImage, detectionArea: IntRect? = nil) -> SkewDetectionResult {
+                              image: GrayImage, detectionArea: IntRect? = nil) throws -> SkewDetectionResult {
         let width = image.width
         let height = image.height
 
@@ -56,7 +77,7 @@ public enum HoughSkewDetector {
             contentRect = area
         }
 
-        var pageWidth = contentRect.width
+        let pageWidth = contentRect.width
         var pageHeight = contentRect.height
         if contentRect.bottom == height {
             pageHeight -= 1
@@ -65,16 +86,24 @@ public enum HoughSkewDetector {
         var stats = SkewStats()
 
         let alphaStart = -maxAngle
-        let alphaSteps = Int(ceil(2 * maxAngle / angleStep))
-        guard alphaSteps > 0 && pageWidth > 0 && pageHeight > 0 else {
+        let alphaStepsDouble = ceil(2 * maxAngle / angleStep)
+        guard maxAngle.isFinite, angleStep.isFinite, angleStep > 0,
+              alphaStepsDouble.isFinite, alphaStepsDouble >= 1,
+              alphaStepsDouble <= 10_000_000 else {
+            throw HoughError.invalidParameters
+        }
+        let alphaSteps = Int(alphaStepsDouble)
+
+        guard pageWidth > 0 && pageHeight > 0 else {
             return SkewDetectionResult(angle: 0, stats: stats)
         }
 
         let minDist = Double(-max(pageWidth, pageHeight))
-        let distCount = 2 * (pageWidth + pageHeight)
-        let accumulatorSize = distCount * alphaSteps
-        guard accumulatorSize > 0 else {
-            return SkewDetectionResult(angle: 0, stats: stats)
+        let (distCount, distOverflow) = 2.multipliedReportingOverflow(by: pageWidth + pageHeight)
+        let (accumulatorSize, accOverflow) = distCount.multipliedReportingOverflow(by: alphaSteps)
+        guard !distOverflow, !accOverflow,
+              accumulatorSize > 0, accumulatorSize <= maxAccumulatorSize else {
+            throw HoughError.detectionTooLarge
         }
 
         var accumulator = [Int32](repeating: 0, count: accumulatorSize)

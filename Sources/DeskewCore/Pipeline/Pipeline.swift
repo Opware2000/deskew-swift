@@ -75,7 +75,7 @@ public enum Pipeline {
                    " using threshold \(threshold)...")
 
         stopwatch.restart()
-        let detection = HoughSkewDetector.detect(
+        let detection = try HoughSkewDetector.detect(
             maxAngle: options.maxAngle,
             angleStep: options.angleStep,
             threshold: threshold,

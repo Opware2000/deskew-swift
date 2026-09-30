@@ -92,12 +92,22 @@ public struct FloatRect: Equatable, Sendable {
     public var isNull: Bool { left == 0 && top == 0 && right == 0 && bottom == 0 }
 
     /// Équivalent de `MakeScaledRect` : multiplie puis arrondit (Round Pascal).
+    ///
+    /// Frontière de confiance : si un produit est non fini ou hors de la plage
+    /// représentable en `Int` (entrée malformée), renvoie `.zero` au lieu de
+    /// planter sur la conversion.
     public func scaled(widthFactor: Double, heightFactor: Double) -> IntRect {
-        IntRect(
-            left: DeskewMath.pascalRound(Double(left) * widthFactor),
-            top: DeskewMath.pascalRound(Double(top) * heightFactor),
-            right: DeskewMath.pascalRound(Double(right) * widthFactor),
-            bottom: DeskewMath.pascalRound(Double(bottom) * heightFactor)
-        )
+        func scaledValue(_ value: Float, _ factor: Double) -> Int? {
+            let product = Double(value) * factor
+            guard product.isFinite, product.magnitude <= 1e15 else { return nil }
+            return DeskewMath.pascalRound(product)
+        }
+        guard let l = scaledValue(left, widthFactor),
+              let t = scaledValue(top, heightFactor),
+              let r = scaledValue(right, widthFactor),
+              let b = scaledValue(bottom, heightFactor) else {
+            return .zero
+        }
+        return IntRect(left: l, top: t, right: r, bottom: b)
     }
 }

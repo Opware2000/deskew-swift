@@ -94,15 +94,15 @@ public struct DeskewOptions: Equatable, Sendable {
             index += 1
         }
 
-        if inputFileName == nil || inputFileName!.isEmpty {
+        guard let input = inputFileName, !input.isEmpty else {
             errorMessage = "No input file given"
             return false
         }
 
-        if outputFileName == nil || outputFileName!.isEmpty {
-            let dir = FilePath.ensureTrailingDelimiter(FilePath.fileDir(inputFileName!))
+        if (outputFileName ?? "").isEmpty {
+            let dir = FilePath.ensureTrailingDelimiter(FilePath.fileDir(input))
             outputFileName = dir + DeskewOptions.defaultOutputPrefix +
-                FilePath.changeFileExt(FilePath.fileName(inputFileName!),
+                FilePath.changeFileExt(FilePath.fileName(input),
                                        to: "." + DeskewOptions.defaultOutputExtension)
         }
 
@@ -119,7 +119,9 @@ public struct DeskewOptions: Equatable, Sendable {
             outputFileName = value
 
         case "-a":
-            if let v = parseDouble(value) {
+            // Borné et fini : évite les débordements d'entiers en aval
+            // (accumulateur Hough) et un angle de skew non réaliste.
+            if let v = parseFiniteDouble(value), v > 0, v <= 90 {
                 maxAngle = v
             } else {
                 errorMessage = "Invalid value for max angle parameter: \(value)"
@@ -133,7 +135,7 @@ public struct DeskewOptions: Equatable, Sendable {
             }
 
         case "-l":
-            if let v = parseDouble(value) {
+            if let v = parseFiniteDouble(value) {
                 skipAngle = v
             } else {
                 errorMessage = "Invalid value for skip angle parameter: \(value)"
@@ -264,6 +266,13 @@ public struct DeskewOptions: Equatable, Sendable {
         Double(value.trimmingCharacters(in: .whitespaces))
     }
 
+    /// Comme `parseDouble` mais **rejette les valeurs non finies**
+    /// (`nan`, `inf`) — frontière de confiance (arguments non fiables).
+    private func parseFiniteDouble(_ value: String) -> Double? {
+        guard let v = parseDouble(value), v.isFinite else { return nil }
+        return v
+    }
+
     private func parseInt(_ value: String) -> Int? {
         let trimmed = value.trimmingCharacters(in: .whitespaces)
         return Int(trimmed)
@@ -278,8 +287,10 @@ public struct DeskewOptions: Equatable, Sendable {
         guard tokens.count == 1 || tokens.count == 2 || tokens.count == 4 else { return nil }
         var values = [Float]()
         for token in tokens {
-            guard let v = parseDouble(token) else { return nil }
-            values.append(Float(v))
+            guard let v = parseFiniteDouble(token) else { return nil }
+            let f = Float(v)
+            guard f.isFinite else { return nil }   // 1e300 -> Float inf
+            values.append(f)
         }
         switch values.count {
         case 1:

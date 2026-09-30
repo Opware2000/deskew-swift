@@ -16,6 +16,7 @@ public enum ImageIOError: Error, CustomStringConvertible {
     case unsupportedFormat(String)
     case conversionFailed(String)
     case cannotWrite(String)
+    case imageTooLarge(String)
 
     public var description: String {
         switch self {
@@ -23,6 +24,7 @@ public enum ImageIOError: Error, CustomStringConvertible {
         case .unsupportedFormat(let path): return "Format d'image non supporté : \(path)"
         case .conversionFailed(let path): return "Échec de conversion d'image : \(path)"
         case .cannotWrite(let path): return "Impossible d'écrire le fichier image : \(path)"
+        case .imageTooLarge(let path): return "Image trop grande (dimensions ou nombre de pixels au-delà de la limite) : \(path)"
         }
     }
 }
@@ -42,6 +44,11 @@ public struct LoadedImage {
 
 /// Chargement d'images via ImageIO / Core Graphics.
 public enum ImageLoader {
+
+    /// Borne de sécurité sur une dimension (pixels).
+    public static let maxDimension = 100_000
+    /// Borne de sécurité sur le nombre total de pixels.
+    public static let maxPixels = 250_000_000
 
     /// Indique si le fichier est lisible comme image.
     public static func canRead(_ path: String) -> Bool {
@@ -70,6 +77,15 @@ public enum ImageLoader {
               CGImageSourceGetCount(source) > 0,
               let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             throw ImageIOError.unsupportedFormat(path)
+        }
+
+        // Frontière de confiance : bornes sur les dimensions d'une image non fiable
+        // (évite un débordement ou une allocation démesurée).
+        let pixelCount = cgImage.width.multipliedReportingOverflow(by: cgImage.height)
+        guard cgImage.width > 0, cgImage.height > 0,
+              cgImage.width <= ImageLoader.maxDimension, cgImage.height <= ImageLoader.maxDimension,
+              !pixelCount.overflow, pixelCount.partialValue <= ImageLoader.maxPixels else {
+            throw ImageIOError.imageTooLarge(path)
         }
 
         let resolution = resolution(from: source)

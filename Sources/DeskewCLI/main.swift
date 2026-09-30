@@ -66,8 +66,10 @@ if options.showParams {
     print(options.optionsDescription(commandLine: arguments))
 }
 
-let inputName = options.inputFileName!
-let outputName = options.outputFileName!
+guard let inputName = options.inputFileName,
+      let outputName = options.outputFileName else {
+    reportBadInput("Invalid parameters!", options: options)
+}
 
 if !ImageLoader.canRead(inputName) {
     reportBadInput("Input file format not supported: " + inputName, options: options)
