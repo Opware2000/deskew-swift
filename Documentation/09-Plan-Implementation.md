@@ -34,9 +34,9 @@ Livrables :
 - ✅ Golden files générés : `Tests/DeskewParityTests/generate_reference.sh` →
   `Tests/DeskewParityTests/reference/` (37 cas : détection, rotations, filtres,
   couleurs, formats, marges/rectangles, TIFF, work-image). Voir le README du dossier.
-- ⬜ Squelette SwiftPM (`DeskewCore`, `DeskewImageIO`, `DeskewCLI`, tests) compilant.
-- ⬜ `LICENSE` (MPL 2.0) et en-têtes de licence.
-- ⬜ Job CI (build + tests) sur macOS ARM.
+- ✅ Squelette SwiftPM (`DeskewCore`, `DeskewImageIO`, `DeskewCLI`, tests) compilant.
+- ✅ `LICENSE` (MPL 2.0) à la racine.
+- ✅ Job CI (build + tests release) sur macOS ARM.
 
 Critère de sortie : `swift build && swift test` passe, golden files exploitables par
 un test de comparaison.
@@ -214,10 +214,11 @@ Dépendances : Phases 4, 5, 7.
 
 Livrables :
 
-- binaire `deskew` (arm64, éventuellement universel x86_64 + arm64),
-- `swift build -c release` reproductible, CI,
-- README d'installation et parité de la sortie console,
-- notes sur les formats supportés (et exclusions).
+- ✅ binaire `deskew` **universel** (arm64 + x86_64) via
+  `Scripts/build_swift_release.sh` ;
+- ✅ `swift build -c release` reproductible, CI GitHub Actions ;
+- ✅ README d'installation/usage et parité de la sortie console ;
+- ✅ notes sur les formats supportés (et exclusions) dans `Documentation/04`.
 
 Critère de sortie : binaire publié ; tests verts en release.
 

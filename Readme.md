@@ -72,7 +72,7 @@ Prérequis : macOS avec **Swift ≥ 5.9** (Xcode 15+). Si la commande `swift` du
 est plus ancienne, utiliser `xcrun swift` ou `Scripts/build_swift_release.sh`.
 
 ```bash
-# Compiler l'exécutable (release)
+# Compiler l'exécutable (release, binaire universel arm64 + x86_64)
 Scripts/build_swift_release.sh
 # ou : xcrun swift build -c release
 

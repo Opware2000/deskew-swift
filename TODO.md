@@ -115,10 +115,10 @@ Liste des tâches, dérivée de
 
 ## Phase 9 — Packaging et release
 
-- [x] `Scripts/build_swift_release.sh`
+- [x] `Scripts/build_swift_release.sh` (binaire universel arm64 + x86_64)
 - [x] Section compilation/utilisation du README
 - [x] CI GitHub Actions : build + tests en release (macOS ARM)
-- [ ] Binaire universel ou arm64 seul (décision)
+- [x] Binaire universel (arm64 + x86_64) — décision : universel
 - [ ] Tag de version + release GitHub
 
 ---
