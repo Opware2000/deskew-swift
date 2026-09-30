@@ -68,10 +68,14 @@ final class CLIParityTests: XCTestCase {
     }
 
     func testConsoleParityAgainstGolden() throws {
+        try XCTSkipIf(isDebugBuild(), "test CLI lent en debug ; exécuté en release")
         let executable = try executablePath()
         var cases = try loadCases()
         if let filter = ProcessInfo.processInfo.environment["PARITY_FILTER"], !filter.isEmpty {
             cases = cases.filter { $0.name.contains(filter) }
+        }
+        if ProcessInfo.processInfo.environment["PARITY_HEAVY"] != "1" {
+            cases = cases.filter { !$0.name.contains("1big") }
         }
 
         for testCase in cases {

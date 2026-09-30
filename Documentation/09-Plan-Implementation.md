@@ -1,5 +1,9 @@
 # 09 — Plan d'implémentation
 
+> **Document historique** : ce plan a été exécuté intégralement (phases 0 à 9
+> terminées, releases v0.1.0 → v0.3.0). Il est conservé comme référence de la
+> démarche. L'état courant des tâches est dans [`TODO.md`](../TODO.md).
+
 Découpage en phases avec dépendances, livrables et critères de sortie. Les phases 1–5
 sont **purement algorithmiques** (aucune entrée-sortie) et donc testables isolément ;
 c'est là que se joue la parité.

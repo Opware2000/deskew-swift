@@ -49,6 +49,22 @@ Le script accepte un chemin de binaire en argument :
 - Les nombres sont formatés en `en-US` par le code Pascal (séparateur de milliers
   `,`, décimale `.`), donc indépendants de la locale système.
 
+### Déduplication des sorties
+
+Après génération, les images de sortie **identiques** sont remplacées par des
+**liens symboliques** vers la première occurrence (détection par SHA-256). Cela
+réduit la taille du corpus (≈11 Mo → ≈9,2 Mo) sans perte de couverture : les tests
+suivent les liens.
+
+### Cas non reproductible (`rot-5-nearest-bg`)
+
+Le filtre `nearest` de l'original **lit hors du buffer** au bord droit/bas
+(comportement indéfini) : sa sortie change à chaque exécution (vérifié : 3 hashes
+différents). L'image de référence n'est donc **pas conservée** pour ce cas ; seul
+`stdout.txt` (angle, statistiques — déterministes) l'est. Les tests qui comparent
+les images **ignorent les cas sans fichier `out.*`**.
+
+
 ## Support TIFF
 
 Sous macOS, Deskew charge `libtiff.dylib` dynamiquement. Le script ajoute

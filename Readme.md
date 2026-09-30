@@ -95,6 +95,8 @@ Scripts/build_swift_release.sh
 
 # Lancer les tests de parité (release, quelques secondes)
 xcrun swift test -c release
+# Inclure le cas de stress (rotation cubic sur une grande image, lent en debug)
+PARITY_HEAVY=1 xcrun swift test -c release
 
 # Sanitizers (data races + mémoire)
 Scripts/sanitizers.sh

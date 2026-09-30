@@ -133,6 +133,33 @@ done <<< "$CASES"
 
 echo
 echo "Golden files générés dans : $REF"
+
+# Déduplique les sorties identiques (liens symboliques) pour limiter la taille.
+echo "Déduplication des sorties identiques..."
+find "$REF" -type f \( -name 'out.*' -o -name 'work-image.png' \) -print0 \
+  | xargs -0 shasum -a 256 | sort > "$REF/.hashes"
+prev=""
+prevf=""
+while read -r hash file; do
+  if [[ "$hash" == "$prev" ]]; then
+    rel="$(python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], os.path.dirname(sys.argv[2])))' "$prevf" "$file")"
+    rm -f "$file"
+    ln -s "$rel" "$file"
+  else
+    prev="$hash"
+    prevf="$file"
+  fi
+done < "$REF/.hashes"
+rm -f "$REF/.hashes"
+
+# Le filtre `nearest` de l'original lit hors du buffer (comportement indéfini) :
+# sa sortie n'est PAS reproductible (vérifié : hashes différents à chaque run).
+# On ne conserve donc pas l'image ; le stdout.txt (angle, stats) reste, lui,
+# déterministe.
+for case in rot-5-nearest-bg; do
+  rm -f "$REF/$case"/out.*
+done
+
 echo "Résumé : $REF/summary.txt"
 if [[ "$FAILED" != "0" ]]; then
   echo "ATTENTION : $FAILED cas en échec." >&2

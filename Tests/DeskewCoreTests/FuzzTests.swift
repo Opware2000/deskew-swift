@@ -131,6 +131,7 @@ final class FuzzTests: XCTestCase {
     // MARK: - 3. Bout-en-bout CLI (détecte les traps du programme entier)
 
     func testFuzzCLIDoesNotCrash() throws {
+        try XCTSkipIf(isDebugBuild(), "fuzz CLI lent en debug ; exécuté en release")
         let bundleDir = URL(fileURLWithPath: Bundle(for: Self.self).bundlePath)
             .deletingLastPathComponent()
         let executable = bundleDir.appendingPathComponent("deskew").path
@@ -178,6 +179,7 @@ final class FuzzTests: XCTestCase {
     /// **rejeter proprement**, jamais planter. Garantit qu'une régression serait
     /// détectée même si le fuzz aléatoire ne retombait pas dessus.
     func testKnownMaliciousInputsDoNotCrash() throws {
+        try XCTSkipIf(isDebugBuild(), "fuzz CLI lent en debug ; exécuté en release")
         let bundleDir = URL(fileURLWithPath: Bundle(for: Self.self).bundlePath)
             .deletingLastPathComponent()
         let executable = bundleDir.appendingPathComponent("deskew").path

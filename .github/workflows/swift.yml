@@ -22,7 +22,8 @@ jobs:
 
       - name: Tests de parité (release)
         # Les golden files sont versionnés : aucun oracle Pascal n'est requis.
-        run: swift test -c release
+        # PARITY_HEAVY=1 inclut le cas de stress (cubic sur une grande image).
+        run: PARITY_HEAVY=1 swift test -c release
 
   sanitizers:
     # Détecte les data races (TSan) et les débordements mémoire (ASan) dans le

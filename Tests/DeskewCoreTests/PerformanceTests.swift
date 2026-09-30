@@ -10,6 +10,10 @@ import Dispatch
 /// cassé) ferait exploser ce ratio.
 final class PerformanceTests: XCTestCase {
 
+    override func setUpWithError() throws {
+        try XCTSkipIf(isDebugBuild(), "tests de performance : exécutés en release uniquement")
+    }
+
     private func makeTextImage(width: Int, height: Int) -> GrayImage {
         var image = GrayImage(width: width, height: height, fill: 255)
         for row in stride(from: 10, to: height - 4, by: 12) {

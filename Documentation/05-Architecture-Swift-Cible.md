@@ -62,8 +62,10 @@ deskew-swift/
 └── Documentation/               # ce dossier
 ```
 
-Dépendances SwiftPM : `swift-argument-parser` pour la CLI, `Accelerate` (framework
-système, pas de dépendance externe).
+Dépendances : **aucune externe**. Le parsing CLI est fait maison (parité stricte avec
+`CmdLineOptions.pas`), `Accelerate` est un framework système, et `libtiff` est chargé
+**dynamiquement** (optionnel, via le shim `CTiffShim`) pour le contrôle de compression
+TIFF.
 
 ## 3. Types fondamentaux
 

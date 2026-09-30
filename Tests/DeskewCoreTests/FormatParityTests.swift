@@ -32,6 +32,10 @@ final class FormatParityTests: XCTestCase {
             let columns = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
             guard columns.count >= 3, columns[1] != "none" else { continue }
             guard !columns[0].hasPrefix("detect-"), !columns[0].hasPrefix("work-") else { continue }
+            // Cas sans image de référence (sortie non reproductible de l'original).
+            let outPath = Self.reference.appendingPathComponent(columns[0])
+                .appendingPathComponent("out.\(columns[1])")
+            guard FileManager.default.fileExists(atPath: outPath.path) else { continue }
             let args = columns[2].split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init)
             cases.append(Case(name: columns[0], ext: columns[1], args: args))
         }
@@ -55,6 +59,9 @@ final class FormatParityTests: XCTestCase {
         var cases = try loadCases()
         if let filter = ProcessInfo.processInfo.environment["PARITY_FILTER"], !filter.isEmpty {
             cases = cases.filter { $0.name.contains(filter) }
+        }
+        if ProcessInfo.processInfo.environment["PARITY_HEAVY"] != "1" {
+            cases = cases.filter { !$0.name.contains("1big") }
         }
         XCTAssertFalse(cases.isEmpty)
 

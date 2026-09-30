@@ -63,7 +63,9 @@ final class DetectionParityTests: XCTestCase {
         let cases = try loadGoldenCases()
         XCTAssertFalse(cases.isEmpty, "aucun cas de détection golden")
 
+        let heavy = ProcessInfo.processInfo.environment["PARITY_HEAVY"] == "1"
         for golden in cases {
+            if golden.name.contains("1big") && !heavy { continue }
             let args = try args(forCase: golden.name)
 
             var options = DeskewOptions()

@@ -182,3 +182,32 @@ ne sort des tampons (allocations non initialisées, pointeurs, empaquetage 1 bit
 Un **job CI dédié** (`sanitizers`) exécute ces vérifications à chaque push. Le test
 `ConcurrencyTests` sert de cible et vérifie aussi le **déterminisme** : le
 multithreading ne modifie ni l'angle, ni les statistiques, ni le seuil Otsu.
+
+## 10. Skills d'agent tierces (audit)
+
+Des **skills d'agent** tierces (MIT) ont été installées **localement** dans
+`.opencode/skills/` (non versionnées). Ce sont des **instructions exécutées par
+l'IA** : elles constituent donc une surface d'**injection de prompt** potentielle et
+ont été auditées.
+
+**Méthode** : recherche de motifs à risque (injonctions du type « ignore les
+instructions précédentes », exfiltration, secrets, `eval`, `curl`/`wget` vers des
+endpoints réels, `base64 -d`, `sudo`, `rm -rf`…) dans les `SKILL.md` et leurs
+`references/`.
+
+**Résultat** : **aucun contenu malveillant**. Les occurrences trouvées sont des
+**exemples de documentation légitimes** :
+
+| Occurrence | Nature |
+| --- | --- |
+| `curl`/`sudo -l`/`base64 -d` (`security-reviewer/references/penetration-testing.md`) | guide de pentest, avec avertissements explicites d'**autorisation préalable** et « ne pas exfiltrer de données réelles » |
+| `curl http://localhost:…/debug/pprof` (`monitoring-expert`) | commandes de profiling locales |
+| `eval(...)` (`security-reviewer/references/vulnerability-patterns.md`) | cité comme **anti-pattern** à éviter |
+| messages « run with sudo » (`cli-developer`) | textes d'aide d'une CLI |
+
+Aucune URL réelle (uniquement `localhost`, `example.com`, `target.com` d'exemple),
+aucun secret, aucune instruction visant l'agent.
+
+**Recommandations** : garder ces skills **locales** (fait), ne pas les committer,
+et traiter leurs suggestions avec le recul habituel (elles sont majoritairement
+orientées web/Node et ne s'appliquent que partiellement à ce projet Swift).
