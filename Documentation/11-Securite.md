@@ -158,3 +158,27 @@ Points d'attention :
   correctif, ces vecteurs provoquaient `SIGTRAP` (exit 133) — vérifié manuellement.
 - **Graine fixe** : un échec est reproductible ; changer la graine élargit la
   couverture.
+
+## 9. Sanitizers (data races et mémoire)
+
+Le code parallélise (Hough, rotation, Otsu) et écrit dans des **tampons bruts**
+(`UnsafeMutableBufferPointer`). On ne se contente pas de « croire » que c'est sûr :
+on le **vérifie** avec les sanitizers Apple.
+
+```bash
+Scripts/sanitizers.sh
+```
+
+| Sanitizer | Cible | Résultat |
+| --- | --- | --- |
+| **ThreadSanitizer** (`--sanitize=thread`) | `ConcurrencyTests` (Otsu + Hough + rotation, tous filtres, 5 passes) | ✅ **aucune data-race** |
+| **AddressSanitizer** (`--sanitize=address`) | `ConcurrencyTests` + `testLoadAllTestImages` (tous les chemins du loader) | ✅ **aucun débordement** |
+
+**Pourquoi c'est concluant** : TSan confirme que les écritures concurrentes sont
+réellement **disjointes** (colonnes d'angles distinctes pour Hough, bandes de lignes
+distinctes pour la rotation) — aucun verrou nécessaire. ASan confirme qu'aucun accès
+ne sort des tampons (allocations non initialisées, pointeurs, empaquetage 1 bit).
+
+Un **job CI dédié** (`sanitizers`) exécute ces vérifications à chaque push. Le test
+`ConcurrencyTests` sert de cible et vérifie aussi le **déterminisme** : le
+multithreading ne modifie ni l'angle, ni les statistiques, ni le seuil Otsu.

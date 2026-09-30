@@ -23,3 +23,13 @@ jobs:
       - name: Tests de parité (release)
         # Les golden files sont versionnés : aucun oracle Pascal n'est requis.
         run: swift test -c release
+
+  sanitizers:
+    # Détecte les data races (TSan) et les débordements mémoire (ASan) dans le
+    # code parallèle et les E/S d'images.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sanitizers (TSan + ASan)
+        run: Scripts/sanitizers.sh
