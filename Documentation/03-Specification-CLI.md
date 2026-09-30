@@ -328,10 +328,12 @@ En Swift, il faut fixer une liste équivalente basée sur ImageIO (voir
 
 ## 13. Notes de mise en œuvre Swift
 
-- `swift-argument-parser` gère les options nommées et positionnelles, mais le
-  comportement d'origine a des **particularités à répliquer** : options sensibles à la
-  casse côté nom, valeurs insensibles à la casse, `-g`/`-s` en « flags combinés »
-  (`cd`, `sptw`). Le plus sûr est un `ParsableCommand` avec des options `String` et une
-  **réutilisation directe de la logique `CheckParam`** dans `DeskewCore.Options`.
+- **Parsing maison** (pas de `swift-argument-parser`) : le comportement d'origine a des
+  **particularités** que les parseurs standards ne reproduisent pas — options
+  sensibles à la casse côté nom, valeurs insensibles à la casse, `-g`/`-s` en
+  « drapeaux combinés » (`cd`, `sptw`). La logique `CheckParam`/`Parse` est donc
+  réimplémentée telle quelle dans `DeskewOptions`.
 - Les messages d'erreur doivent rester identiques pour ne pas casser les scripts.
 - Le mode `-g d` (detect-only) doit continuer à n'écrire aucun fichier.
+- **Extension** : `--version`/`-V` (propre au port Swift) est intercepté avant le
+  parsing et n'affecte pas la parité par défaut.

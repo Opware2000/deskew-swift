@@ -174,6 +174,9 @@ reproduire exactement `-c tlzw|trle|tdeflate|tjpeg|tg4`, la sortie TIFF passe pa
 - **RGBA** : pris en charge (canal alpha non associé, `ExtraSamples`), la compression
   demandée est donc aussi appliquée aux sorties avec transparence
   (`-f rgba32 -c tlzw`, etc.).
+- **RGBA + JPEG** : combinaison non standard (JPEG n'a pas de canal alpha). libtiff
+  l'écrit (4 composantes), mais le résultat est **lossy** ; préférer un schéma
+  sans perte (LZW, Deflate) pour les images avec transparence.
 - **G4** : libtiff attend `Photometric = WhiteIsZero` (0) ; nos bits valent `1 = blanc`,
   ils sont donc **inversés** avant écriture.
 - libtiff écrit ses diagnostics sur `stderr` ; le shim installe un handler silencieux

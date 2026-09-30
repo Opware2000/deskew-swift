@@ -9,7 +9,8 @@ signatures et les décisions de conception.
 1. **Parité algorithmique** avec la version Pascal (mêmes résultats à tolérance près).
 2. **Cœur pur et testable** : aucun accès disque dans les algorithmes.
 3. **Performance arm64** : `Float` (32 bits) là où l'original utilise `Single`,
-   `Accelerate`/`vDSP`/`vImage` pour les boucles massives, SIMD pour les canaux.
+   **SIMD Swift** (`SIMD4<Float>`) pour les canaux, parallélisation
+   (`DispatchQueue.concurrentPerform`). *Accelerate n'a finalement pas été nécessaire.*
 4. **Multithreading** sans état partagé mutable (voir [06](06-Multithreading-et-Performance.md)).
 5. **API macro raisonnable** : pas d'abstraction dont on n'a pas besoin (pas de
    protocole « PixelFormat » à trois niveaux, etc.).
@@ -63,9 +64,9 @@ deskew-swift/
 ```
 
 Dépendances : **aucune externe**. Le parsing CLI est fait maison (parité stricte avec
-`CmdLineOptions.pas`), `Accelerate` est un framework système, et `libtiff` est chargé
-**dynamiquement** (optionnel, via le shim `CTiffShim`) pour le contrôle de compression
-TIFF.
+`CmdLineOptions.pas`), et `libtiff` est chargé **dynamiquement** (optionnel, via le
+shim `CTiffShim`) pour le contrôle de compression TIFF. Aucun paquet tiers n'est requis
+à la compilation.
 
 ## 3. Types fondamentaux
 
@@ -231,15 +232,17 @@ struct DeskewOptions {
     var isValid: Bool { /* cf. § 2 de 03 */ }
 
     /// Parse identique à TCmdLineOptions.CheckParam / Parse.
-    static func parse(_ args: [String]) -> Result<DeskewOptions, OptionsError>
+    mutating func parse(_ args: [String]) -> Bool
 
     func contentRect(inImageBounds: IntRect, resolution: ResolutionInfo) -> IntRect?
     var optionsDescription: String { /* équivalent OptionsToString */ }
 }
 ```
 
-Le parsing est identique à `CmdLineOptions.pas` ; `swift-argument-parser` peut servir
-de façade pour `--help` mais la sémantique d'origine doit être reproduite (voir
+Le parsing est identique à `CmdLineOptions.pas`. Il est **fait maison** (pas de
+`swift-argument-parser`) afin de reproduire exactement la sémantique d'origine :
+sensibilité à la casse des noms d'options, valeurs insensibles à la casse, drapeaux
+combinés (`-g cd`, `-s sp`), messages d'erreur identiques (voir
 [03](03-Specification-CLI.md) § 13).
 
 ### 4.5 Pipeline

@@ -88,9 +88,9 @@ Légende cible :
 | `ParseCommandLine` | function | *(CLI)* | `CommandLine.arguments` |
 | `CalcContentRectForImage` | function | `ContentRect.forImage` | marges vs rect |
 | `TrySetTiffCompressionFromMetadata` | function | `Metadata.tiffCompression` | IO+Options |
-| `OptionsToString` | function | `DeskewOptions.description` | journal |
-| `EnsureTrailingPathDelimiter` | function | `URL`/helper | |
-| `TiffCompressionOptionAsInput` | const | `TiffCompression.fromInput` | |
+| `OptionsToString` | function | `DeskewOptions.optionsDescription(commandLine:)` | journal |
+| `EnsureTrailingPathDelimiter` | function | `FilePath.ensureTrailingDelimiter` | |
+| `TiffCompressionOptionAsInput` | const | `TiffCompression.input` | |
 | `TiffCompressionNames` | const | mapping énum | |
 | `SizeUnitTokens` | const | `SizeUnit.rawValue` | |
 | `FloatFmtSettings` | var | `Locale`-indépendant | parsing `.` décimal |

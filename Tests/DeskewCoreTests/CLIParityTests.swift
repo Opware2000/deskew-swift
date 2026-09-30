@@ -124,4 +124,14 @@ final class CLIParityTests: XCTestCase {
             }
         }
     }
+
+    /// `--version` / `-V` (extension du port Swift).
+    func testVersionFlag() throws {
+        let executable = try executablePath()
+        for flag in ["--version", "-V"] {
+            let output = try run(executable, args: [flag])
+            XCTAssertTrue(output.contains("deskew-swift"), "\(flag) : \(output)")
+            XCTAssertTrue(output.contains("Deskew 1.33"), "\(flag) : \(output)")
+        }
+    }
 }

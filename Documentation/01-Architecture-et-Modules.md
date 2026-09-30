@@ -105,7 +105,7 @@ flowchart TD
 | `ImageUtils.pas` (Otsu/Binarize) | `DeskewCore.Otsu`, `DeskewCore.Binarization` | Algorithme pur |
 | `ImageUtils.pas` (RotateImage) | `DeskewCore.ImageRotation`, `DeskewCore.Resampling` | Algorithme pur |
 | `Utils.pas` | `DeskewCore.Geometry` | Utilitaire |
-| `CmdLineOptions.pas` | `DeskewCore.Options` + `DeskewCLI` (parsing ArgumentParser) | Mixte |
+| `CmdLineOptions.pas` | `DeskewCore.Options` + `DeskewCLI` (parsing maison fidèle) | Mixte |
 | `MainUnit.pas` | `DeskewCLI.main` + `DeskewCore.Pipeline` | Orchestration |
 | `ImagingTypes.pas` (couleurs, formats) | `DeskewCore.Pixel` (`GrayImage`, `RGBImage`, `RGBAImage`) | Types |
 | `Imaging.pas` (I/O, métadonnées) | `DeskewImageIO` (ImageIO/CoreGraphics) | Entrées-sorties |
@@ -135,9 +135,9 @@ les algorithmes testables sans disque et parallélisables sans état partagé.
 - Les deux appellent `MainUnit.RunDeskew`, qui ne prend aucun argument et lit
   `ParamStr`/`ParamCount` (la ligne de commande globale).
 
-En Swift, l'équivalent est un exécutable `deskew` (`@main struct DeskewCommand`), qui
-construit une structure `Options` via `swift-argument-parser` puis appelle
-`Pipeline.run(options:)`.
+En Swift, l'équivalent est un exécutable `deskew` (`@main`-like, code de premier niveau
+dans `main.swift`), qui construit une structure `DeskewOptions` (parsing **maison**,
+fidèle à `CmdLineOptions.pas`) puis appelle `Pipeline.run(options:)`.
 
 ## 7. Constantes applicatives
 

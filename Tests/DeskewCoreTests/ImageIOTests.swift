@@ -11,10 +11,17 @@ final class ImageIOTests: XCTestCase {
         .deletingLastPathComponent()
         .deletingLastPathComponent()
 
-    private static let testImages = [
-        "1big.png", "2.png", "3.png", "4.png", "5.png", "6.png",
-        "F1550.jpg", "1-lzw.tif", "1-g4.tif", "tiff-jpeg.tif"
-    ]
+    private static var testImages: [String] {
+        var images = [
+            "1big.png", "2.png", "3.png", "4.png", "5.png", "6.png",
+            "F1550.jpg", "1-lzw.tif", "1-g4.tif", "tiff-jpeg.tif"
+        ]
+        // La grande image est coûteuse en debug ; couverte en release (PARITY_HEAVY=1).
+        if ProcessInfo.processInfo.environment["PARITY_HEAVY"] != "1" {
+            images.removeAll { $0 == "1big.png" }
+        }
+        return images
+    }
 
     private func inputPath(_ name: String) -> String {
         Self.root.appendingPathComponent("TestImages").appendingPathComponent(name).path
