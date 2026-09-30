@@ -238,6 +238,11 @@ explicitement). `g4` force automatiquement `ifBinary`.
 empaquetés, `1` = blanc) : seuillage d'Imaging `> 128 → blanc`, comme `EncodeBinary`.
 Le TIFF résultant est en G4 (cf. §5).
 
+> **Limite connue** : le 1 bit n'est réellement obtenu que pour **PNG** et **TIFF**.
+> Pour **GIF** et **BMP**, ImageIO ré-encode en 8 bits (ces formats n'ont pas de
+> chemin 1 bit dans notre writer). Le rendu est identique, seule la profondeur
+> diffère. Voir l'issue #6.
+
 ## 7. Copie « sans changement »
 
 Si aucun traitement n'a modifié l'image et que l'extension de sortie est identique à

@@ -51,6 +51,12 @@ func reportBadInput(_ message: String, options: DeskewOptions, showUsage: Bool =
 
 let arguments = Array(CommandLine.arguments.dropFirst())
 
+// Extension (hors parité) : version du port Swift.
+if arguments.contains("--version") || arguments.contains("-V") {
+    print("deskew-swift \(DeskewVersion.port) — portage Swift de Deskew \(DeskewVersion.upstream)")
+    exit(0)
+}
+
 print(appTitle)
 print(appHome)
 print("")
@@ -109,8 +115,14 @@ for line in result.log {
 
 if options.saveWorkImage, let workImage = result.workImage {
     let workPath = FilePath.ensureTrailingDelimiter(FilePath.fileDir(outputName)) + "work-image.png"
-    let workOptions = ImageWriteOptions(resolution: loaded.resolution)
-    try? ImageWriter.save(.gray(workImage), to: workPath, options: workOptions)
+    let workOptions = ImageWriteOptions(resolution: result.resolvedResolution)
+    do {
+        try ImageWriter.save(.gray(workImage), to: workPath, options: workOptions)
+    } catch {
+        print("")
+        print(error)
+        exit(1)
+    }
 }
 
 if options.detectOnly {
@@ -127,7 +139,13 @@ print("Saving output (\(FilePath.expandFileName(outputName)) [\(outputImage.widt
 
 let directory = FilePath.fileDir(outputName)
 if !directory.isEmpty {
-    try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+    do {
+        try FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+    } catch {
+        print("")
+        print(error)
+        exit(1)
+    }
 }
 
 let sameExtension = FilePath.fileExt(inputName).lowercased() == FilePath.fileExt(outputName).lowercased()
@@ -135,7 +153,7 @@ var saveWatch = Stopwatch()
 if result.changed || !sameExtension {
     let writeOptions = ImageWriteOptions(jpegQuality: options.jpegCompressionQuality,
                                          tiffCompression: result.resolvedTiffCompression,
-                                         resolution: loaded.resolution)
+                                         resolution: result.resolvedResolution)
     do {
         try ImageWriter.save(outputImage, to: outputName, options: writeOptions)
     } catch {
@@ -144,8 +162,16 @@ if result.changed || !sameExtension {
         exit(1)
     }
 } else {
-    try? FileManager.default.removeItem(atPath: outputName)
-    try? FileManager.default.copyItem(atPath: inputName, toPath: outputName)
+    do {
+        if FileManager.default.fileExists(atPath: outputName) {
+            try FileManager.default.removeItem(atPath: outputName)
+        }
+        try FileManager.default.copyItem(atPath: inputName, toPath: outputName)
+    } catch {
+        print("")
+        print(error)
+        exit(1)
+    }
 }
 
 if options.showTimings {

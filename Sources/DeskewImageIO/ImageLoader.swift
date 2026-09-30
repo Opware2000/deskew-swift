@@ -50,14 +50,18 @@ public enum ImageLoader {
     /// Borne de sécurité sur le nombre total de pixels.
     public static let maxPixels = 250_000_000
 
-    /// Indique si le fichier est lisible comme image.
+    /// Indique si le fichier est probablement lisible (vérification **peu
+    /// coûteuse**, par extension — ne lit pas le contenu ; le décodage réel est
+    /// fait par `load`).
     public static func canRead(_ path: String) -> Bool {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
-              let source = CGImageSourceCreateWithData(data as CFData, nil) else {
-            return false
-        }
-        return CGImageSourceGetCount(source) > 0
+        guard FileManager.default.fileExists(atPath: path) else { return false }
+        return readableExtensions.contains(FilePath.fileExt(path).lowercased())
     }
+
+    /// Extensions lisibles via ImageIO.
+    private static let readableExtensions: Set<String> = [
+        "png", "jpg", "jpeg", "tif", "tiff", "gif", "bmp", "psd", "heic", "heif"
+    ]
 
     /// Charge une image et la convertit en niveaux de gris 8 bits.
     public static func loadGray8(path: String) throws -> GrayImage {

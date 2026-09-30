@@ -200,4 +200,49 @@ final class ImageIOTests: XCTestCase {
         let compression = (tiff[kCGImagePropertyTIFFCompression] as? NSNumber)?.intValue
         XCTAssertEqual(compression, 5, "compression LZW attendue")
     }
+
+    /// Le DPI forcé (`-p`) doit être appliqué à la **sortie** (issue #1).
+    func testDPIOverrideAppliedToOutput() throws {
+        var options = DeskewOptions()
+        _ = options.parse(["-p", "300", "in.png"])
+        let image = PixelImage.gray(GrayImage(width: 16, height: 16, fill: 255))
+        let result = try Pipeline.run(input: image, resolution: .unknown, options: options)
+
+        XCTAssertEqual(result.resolvedResolution.physicalPixelSize(.dpi)?.x ?? 0, 300, accuracy: 1e-6)
+
+        let out = tempPath("dpi-override.png")
+        try ImageWriter.save(result.outputImage!, to: out,
+                             options: ImageWriteOptions(resolution: result.resolvedResolution))
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: out)),
+              let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
+            return XCTFail("propriétés absentes")
+        }
+        XCTAssertEqual((properties[kCGImagePropertyDPIWidth] as? NSNumber)?.intValue, 300)
+    }
+
+    /// TIFF RGBA avec compression contrôlée (issue #7).
+    func testRGBACompressedTIFFRoundTrip() throws {
+        guard TiffWriter.isAvailable else { throw XCTSkip("libtiff absent") }
+        let rgba = PixelImage.rgba(RGBAImage(width: 16, height: 16,
+                                             fill: RGBA32(r: 10, g: 20, b: 30, a: 128)))
+        for scheme in [TiffCompression.lzw, .deflate] {
+            let out = tempPath("rgba-\(scheme.rawValue).tif")
+            try ImageWriter.save(rgba, to: out, options: ImageWriteOptions(tiffCompression: scheme))
+
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: out)),
+                  let source = CGImageSourceCreateWithData(data as CFData, nil),
+                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                  let tiff = properties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] else {
+                return XCTFail("propriétés TIFF absentes")
+            }
+            let compression = (tiff[kCGImagePropertyTIFFCompression] as? NSNumber)?.intValue
+            let expected = scheme == .lzw ? 5 : 8
+            XCTAssertEqual(compression, expected, "rgba tif \(scheme.rawValue)")
+
+            let reloaded = try ImageLoader.load(path: out).image
+            // Le round-trip alpha passe par prémultiplié/déprémultiplié : tolérance.
+            assertImagesClose(rgba, reloaded, maxDiff: 2, meanDiff: 1.0, "rgba tif \(scheme.rawValue)")
+        }
+    }
 }

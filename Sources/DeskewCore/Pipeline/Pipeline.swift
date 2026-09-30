@@ -32,6 +32,8 @@ public struct PipelineResult {
     public var resolvedTiffCompression: TiffCompression?
     /// Format de sortie effectif (pour l'affichage console).
     public var resolvedOutputFormat: PixelFormat?
+    /// Résolution effective (avec l'override `-p`), à utiliser pour l'écriture.
+    public var resolvedResolution: ResolutionInfo
 }
 
 /// Orchestration du traitement (équivalent de `DoDeskew`).
@@ -90,7 +92,8 @@ public enum Pipeline {
 
         var result = PipelineResult(outputImage: nil, workImage: nil, changed: false,
                                     skewAngle: detection.angle, stats: detection.stats, log: log,
-                                    resolvedTiffCompression: nil, resolvedOutputFormat: nil)
+                                    resolvedTiffCompression: nil, resolvedOutputFormat: nil,
+                                    resolvedResolution: effectiveResolution)
 
         // Compression TIFF effective (option `input` reprise des métadonnées).
         let effectiveTiffCompression: TiffCompression?

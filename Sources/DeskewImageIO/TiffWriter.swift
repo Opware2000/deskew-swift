@@ -45,6 +45,7 @@ public enum TiffWriter {
         static let yResolution: Int32 = 283
         static let planarConfig: Int32 = 284
         static let resolutionUnit: Int32 = 296
+        static let extraSamples: Int32 = 338
         static let jpegColorMode: Int32 = 65538
     }
     private enum Compression {
@@ -63,11 +64,11 @@ public enum TiffWriter {
     private static let planarConfigContig: Int32 = 1
     private static let resolutionUnitInch: Int32 = 2
     private static let jpegColorModeRGB: Int32 = 2
+    private static let extraSampleUnassAlpha: Int32 = 2
 
     /// Ce writer sait-il écrire ce couple (image, compression) ?
     static func canWrite(_ image: PixelImage, compression: TiffCompression) -> Bool {
         guard isAvailable else { return false }
-        if case .rgba = image { return false }   // alpha non géré ici
         return true
     }
 
@@ -145,8 +146,27 @@ public enum TiffWriter {
                 }
             }
 
-        case .rgba:
-            throw WriteError.unsupportedFormat
+        case .rgba(let rgba):
+            // RGB + alpha non associé (ExtraSamples = unassociated).
+            setup(tif, width: width, height: height, bits: 8, samples: 4,
+                  photometric: Photometric.rgb, compression: comp, dpi: dpi)
+            _ = dsk_tiff_set_field_u32(tif, Tag.extraSamples, UInt32(extraSampleUnassAlpha))
+            var rowBuffer = [UInt8](repeating: 0, count: width * 4)
+            try rowBuffer.withUnsafeMutableBufferPointer { buffer in
+                for row in 0..<height {
+                    let offset = row * width * 4
+                    for x in 0..<width {
+                        let s = offset + x * 4
+                        buffer[x * 4] = rgba.pixels[s + 2]     // R
+                        buffer[x * 4 + 1] = rgba.pixels[s + 1] // G
+                        buffer[x * 4 + 2] = rgba.pixels[s]     // B
+                        buffer[x * 4 + 3] = rgba.pixels[s + 3] // A
+                    }
+                    if dsk_tiff_write_scanline(tif, buffer.baseAddress, UInt32(row), 0) == 0 {
+                        throw WriteError.writeFailed
+                    }
+                }
+            }
         }
 
         _ = dsk_tiff_write_directory(tif)
