@@ -102,9 +102,9 @@ mémoire) sur une entrée malformée, pas l'exécution de code arbitraire.
 2. **Ne jamais convertir un `Double` non borné en `Int`** sans garde de plage.
 3. **Garder les bornes de ressources** (`maxAccumulatorSize`, `maxPixels`,
    `maxDimension`) et les tester.
-4. **Fuzzing** (recommandé, non fait ici) : fuzzer le parsing d'arguments et le
-   chargement d'images (ex. `swift-testing` + corpus d'images corrompues) pour
-   détecter d'autres traps.
+4. **Fuzzing** : mis en place (cf. §8) — parsing d'arguments, chargement et
+   écriture d'images, exécution CLI bout-en-bout, plus un corpus de régression des
+   vecteurs déjà trouvés.
 
 ## 6. Tests de non-régression
 
@@ -129,4 +129,32 @@ mémoire) sur une entrée malformée, pas l'exécution de code arbitraire.
 | Image démesurée | tentative d'allocation (OOM) | erreur explicite |
 
 Ces durcissements **ne modifient pas** les cas d'usage légitimes : les 37 golden
-cases et les 70 tests passent.
+cases et les 75 tests passent.
+
+## 8. Fuzzing
+
+`Tests/DeskewCoreTests/FuzzTests.swift` — fuzzers **déterministes** (PRNG SplitMix64
+à graine fixe → reproductibles). Objectif : *aucune entrée non fiable ne doit
+provoquer de trap ou de signal*. On ne vérifie pas la sémantique, seulement
+l'absence de plantage.
+
+| Fuzzer | Entrées | Volume | Méthode |
+| --- | --- | --- | --- |
+| Parsing d'arguments | jetons aléatoires (options, valeurs normales, limites, malveillantes : `inf`, `nan`, `1e300`, chaînes de 2000 car., NUL, Unicode…) | 5 000 tableaux | in-process `DeskewOptions.parse` |
+| Chargement d'images | octets aléatoires, en-têtes PNG/JPEG/TIFF/GIF/BMP + charge aléatoire, mutations (bits inversés, troncature) d'une image réelle | ~700 fichiers | `ImageLoader.load` |
+| CLI bout-en-bout | arguments aléatoires + image d'entrée | 80 exécutions | sous-processus `deskew` |
+| Écriture d'images | petits rasters + qualités/compressions aléatoires | 25 écritures | `ImageWriter.save` puis relecture |
+| **Corpus de régression** | vecteurs déjà trouvés (FIND-001 à FIND-005) | 31 vecteurs | sous-processus, doit rejeter proprement |
+
+Points d'attention :
+
+- **Bac à sable** : le fuzzer CLI s'exécute dans un dossier temporaire avec une copie
+  de l'image d'entrée, et ses jetons excluent tout chemin — **aucune écriture hors du
+  bac à sable** (pas de risque d'écraser `TestImages/`).
+- **Détection des crashes** : pour les sous-processus, on teste
+  `terminationReason != .uncaughtSignal` et `terminationStatus < 128`.
+- **Corpus de régression** : il garantit qu'une réapparition de FIND-001/002 serait
+  détectée même si le tirage aléatoire ne retombait pas sur le vecteur. Avant
+  correctif, ces vecteurs provoquaient `SIGTRAP` (exit 133) — vérifié manuellement.
+- **Graine fixe** : un échec est reproductible ; changer la graine élargit la
+  couverture.
