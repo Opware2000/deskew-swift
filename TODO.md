@@ -5,7 +5,8 @@ Liste des tâches, dérivée de
 
 **Légende :** `[x]` fait · `[ ]` à faire · `[~]` en cours
 
-**Progression :** phases 0 à 7 réalisées ; phase 8 en cours ; phase 9 à faire.
+**Progression :** toutes les phases (0 à 9) sont terminées ; parité validée
+(59 tests, 37 golden cases) et release `v0.1.0` publiée.
 
 | Phase | Objet | État |
 | ----- | ----- | ---- |
@@ -18,7 +19,11 @@ Liste des tâches, dérivée de
 | 6 | Entrées-sorties ImageIO | 🟢 |
 | 7 | Pipeline et exécutable | 🟢 |
 | 8 | Multithreading et performance | 🟢 |
-| 9 | Packaging et release | 🟡 |
+| 9 | Packaging et release | 🟢 |
+
+---
+
+**Toutes les phases sont terminées.** Voir la définition de « terminé » ci-dessous.
 
 ---
 
@@ -119,7 +124,7 @@ Liste des tâches, dérivée de
 - [x] Section compilation/utilisation du README
 - [x] CI GitHub Actions : build + tests en release (macOS ARM)
 - [x] Binaire universel (arm64 + x86_64) — décision : universel
-- [ ] Tag de version + release GitHub
+- [x] Tag de version + release GitHub (`v0.1.0`)
 
 ---
 

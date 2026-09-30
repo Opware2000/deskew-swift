@@ -31,7 +31,8 @@ L'objectif est de **reproduire fidèlement les algorithmes** du projet original
 | Algorithmes (Otsu, binarisation, rotation, Hough) | ✅ |
 | Entrées-sorties ImageIO | ✅ |
 | Pipeline et exécutable CLI | ✅ |
-| Multithreading et optimisation | 🟡 en cours |
+| Multithreading et optimisation | ✅ |
+| Packaging et release (`v0.1.0`) | ✅ |
 
 Suivi détaillé des tâches restantes : [`TODO.md`](TODO.md).
 
