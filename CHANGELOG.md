@@ -9,6 +9,24 @@ Toutes les évolutions notables de **deskew-swift**, la réimplémentation en Sw
 
 ---
 
+## Non publié
+
+### 🔧 Améliorations
+
+- **Installation Homebrew simplifiée** :
+  `brew install Opware2000/tap/deskew-swift`. La formule vit désormais dans un
+  **tap** dédié ([`Opware2000/homebrew-tap`](https://github.com/Opware2000/homebrew-tap)) —
+  Homebrew n'accepte plus les formules par chemin local.
+
+### Améliorations internes
+
+- Documentation corrigée (références obsolètes à `swift-argument-parser`, à une
+  signature d'API inexacte et à `Accelerate`).
+- Nouveau test pour `--version` / `-V` ; l'image de stress est exclue des tests en
+  mode debug (exécutée en release et en intégration continue).
+
+---
+
 ## v0.4.0 — 30 septembre 2026
 
 ### 🐛 Corrections
