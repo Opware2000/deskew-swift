@@ -58,24 +58,30 @@ public enum Pipeline {
             throw PipelineError.missingResolutionInfo
         }
 
+        var log: [String] = []
+        var stopwatch = Stopwatch()
+
         let threshold: Int
         if options.thresholdingMethod == .explicit {
             threshold = options.thresholdLevel
         } else {
+            stopwatch.restart()
             threshold = Otsu.threshold(image: workingGray, rect: contentRect)
+            if options.showTimings { log.append(stopwatch.line("Auto thresholding")) }
         }
 
-        var log: [String] = []
         let inRect = contentRect != workingGray.bounds
         log.append("Calculating skew angle" + (inRect ? " (in \(contentRect))" : "") +
                    " using threshold \(threshold)...")
 
+        stopwatch.restart()
         let detection = HoughSkewDetector.detect(
             maxAngle: options.maxAngle,
             angleStep: options.angleStep,
             threshold: threshold,
             image: workingGray,
             detectionArea: contentRect)
+        if options.showTimings { log.append(stopwatch.line("Skew detection")) }
 
         log.append("Skew angle found [deg]: " + String(format: "%4.3f", detection.angle))
         if options.showDetectionStats {
@@ -107,6 +113,8 @@ public enum Pipeline {
 
         var output: PixelImage? = input
         if abs(detection.angle) >= options.skipAngle {
+            result.log.append("Rotating image...")
+            stopwatch.restart()
             var rotated = input.ensureRotatable(background: options.backgroundColor)
             rotated = rotated.rotated(angleDegrees: detection.angle,
                                       background: options.backgroundColor,
@@ -114,7 +122,7 @@ public enum Pipeline {
                                       fitRotated: !options.cropToInput)
             output = rotated
             result.changed = true
-            result.log.append("Rotating image...")
+            if options.showTimings { result.log.append(stopwatch.line("Rotate image")) }
         } else {
             result.log.append("Skipping deskewing step, skew angle lower than threshold of " +
                               String(format: "%4.2f", options.skipAngle))

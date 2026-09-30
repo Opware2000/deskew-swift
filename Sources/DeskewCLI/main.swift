@@ -77,10 +77,15 @@ if !ImageWriter.canWrite(outputName) {
 }
 
 let loaded: LoadedImage
+var loadWatch = Stopwatch()
 do {
     loaded = try ImageLoader.load(path: inputName)
 } catch {
     reportBadInput("Loaded input image is not valid: " + inputName, options: options, showUsage: false)
+}
+
+if options.showTimings {
+    print(loadWatch.line("Load input file"))
 }
 
 print("Preparing input image (\(FilePath.fileName(inputName)) [\(loaded.width)x\(loaded.height)/\(loaded.format.name)]) ...")
@@ -124,6 +129,7 @@ if !directory.isEmpty {
 }
 
 let sameExtension = FilePath.fileExt(inputName).lowercased() == FilePath.fileExt(outputName).lowercased()
+var saveWatch = Stopwatch()
 if result.changed || !sameExtension {
     let writeOptions = ImageWriteOptions(jpegQuality: options.jpegCompressionQuality,
                                          tiffCompression: result.resolvedTiffCompression,
@@ -138,6 +144,10 @@ if result.changed || !sameExtension {
 } else {
     try? FileManager.default.removeItem(atPath: outputName)
     try? FileManager.default.copyItem(atPath: inputName, toPath: outputName)
+}
+
+if options.showTimings {
+    print(saveWatch.line("Save output file"))
 }
 
 print("Done!")

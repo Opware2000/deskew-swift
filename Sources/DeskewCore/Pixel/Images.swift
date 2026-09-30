@@ -27,6 +27,18 @@ public struct GrayImage: Equatable, Sendable {
         self.pixels = pixels
     }
 
+    /// Allocation sans initialisation à zéro : le tampon doit être **entièrement
+    /// écrit** avant lecture.
+    public init(uninitializedWidth width: Int, height: Int) {
+        precondition(width >= 0 && height >= 0, "dimensions négatives")
+        self.width = width
+        self.height = height
+        let count = width * height
+        self.pixels = Array(unsafeUninitializedCapacity: count) { _, initializedCount in
+            initializedCount = count
+        }
+    }
+
     public var bounds: IntRect { IntRect(left: 0, top: 0, right: width, bottom: height) }
     public var isValid: Bool { width > 0 && height > 0 && pixels.count == width * height }
 
@@ -76,6 +88,17 @@ public struct RGBImage: Equatable, Sendable {
         self.width = width
         self.height = height
         self.pixels = pixels
+    }
+
+    /// Allocation sans initialisation à zéro (tampon à écrire entièrement).
+    public init(uninitializedWidth width: Int, height: Int) {
+        precondition(width >= 0 && height >= 0, "dimensions négatives")
+        self.width = width
+        self.height = height
+        let count = width * height * Self.bytesPerPixel
+        self.pixels = Array(unsafeUninitializedCapacity: count) { _, initializedCount in
+            initializedCount = count
+        }
     }
 
     public var bounds: IntRect { IntRect(left: 0, top: 0, right: width, bottom: height) }
@@ -155,6 +178,17 @@ public struct RGBAImage: Equatable, Sendable {
         self.width = width
         self.height = height
         self.pixels = pixels
+    }
+
+    /// Allocation sans initialisation à zéro (tampon à écrire entièrement).
+    public init(uninitializedWidth width: Int, height: Int) {
+        precondition(width >= 0 && height >= 0, "dimensions négatives")
+        self.width = width
+        self.height = height
+        let count = width * height * Self.bytesPerPixel
+        self.pixels = Array(unsafeUninitializedCapacity: count) { _, initializedCount in
+            initializedCount = count
+        }
     }
 
     public var bounds: IntRect { IntRect(left: 0, top: 0, right: width, bottom: height) }

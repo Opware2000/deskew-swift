@@ -50,7 +50,7 @@ public enum PixelImage {
         case .gray(let image):
             return image
         case .rgb(let image):
-            var gray = GrayImage(width: image.width, height: image.height)
+            var gray = GrayImage(uninitializedWidth: image.width, height: image.height)
             image.pixels.withUnsafeBufferPointer { src in
                 gray.pixels.withUnsafeMutableBufferPointer { dst in
                     var s = 0
@@ -64,7 +64,7 @@ public enum PixelImage {
             }
             return gray
         case .rgba(let image):
-            var gray = GrayImage(width: image.width, height: image.height)
+            var gray = GrayImage(uninitializedWidth: image.width, height: image.height)
             image.pixels.withUnsafeBufferPointer { src in
                 gray.pixels.withUnsafeMutableBufferPointer { dst in
                     var s = 0

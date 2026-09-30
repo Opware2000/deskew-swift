@@ -31,7 +31,7 @@ public enum ImageRotation {
         case .general(let plan):
             let sampler = Sampler(kind: .gray8, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
-            var destination = GrayImage(width: plan.dstWidth, height: plan.dstHeight)
+            var destination = GrayImage(uninitializedWidth: plan.dstWidth, height: plan.dstHeight)
             destination.pixels.withUnsafeMutableBufferPointer { buffer in
                 renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
                     buffer[index] = color.b
@@ -53,7 +53,7 @@ public enum ImageRotation {
         case .general(let plan):
             let sampler = Sampler(kind: .rgb24, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
-            var destination = RGBImage(width: plan.dstWidth, height: plan.dstHeight)
+            var destination = RGBImage(uninitializedWidth: plan.dstWidth, height: plan.dstHeight)
             destination.pixels.withUnsafeMutableBufferPointer { buffer in
                 renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
                     let i = index * RGBImage.bytesPerPixel
@@ -78,7 +78,7 @@ public enum ImageRotation {
         case .general(let plan):
             let sampler = Sampler(kind: .rgba32, width: image.width, height: image.height,
                                   background: background, bytes: image.pixels)
-            var destination = RGBAImage(width: plan.dstWidth, height: plan.dstHeight)
+            var destination = RGBAImage(uninitializedWidth: plan.dstWidth, height: plan.dstHeight)
             destination.pixels.withUnsafeMutableBufferPointer { buffer in
                 renderParallel(sampler: sampler, filter: filter, plan: plan, background: background) { index, color in
                     let i = index * RGBAImage.bytesPerPixel
