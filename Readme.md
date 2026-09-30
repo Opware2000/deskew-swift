@@ -76,7 +76,7 @@ est plus ancienne, utiliser `xcrun swift` ou `Scripts/build_swift_release.sh`.
 
 ```bash
 # Téléchargement direct (binaire universel arm64 + x86_64)
-curl -L -o deskew https://github.com/Opware2000/deskew-swift/releases/download/v0.2.0/deskew-macos-universal
+curl -L -o deskew https://github.com/Opware2000/deskew-swift/releases/download/v0.3.0/deskew-macos-universal
 chmod +x deskew && sudo mv deskew /usr/local/bin/
 
 # Homebrew (formule locale, sans tap)
