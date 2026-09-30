@@ -35,6 +35,7 @@ L'objectif est de **reproduire fidèlement les algorithmes** du projet original
 | Packaging et release (`v0.1.0`) | ✅ |
 
 Suivi détaillé des tâches restantes : [`TODO.md`](TODO.md).
+Journal des versions : [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Organisation du dépôt
 
