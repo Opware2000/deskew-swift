@@ -389,7 +389,27 @@ Chaque optimisation est décrite avec son principe, **pourquoi elle est efficace
   écrit en totalité. Mesurer, vérifier la parité, revenir en arrière si nécessaire —
   ne jamais optimiser à l'aveugle.
 
-### 10.15 Pistes non retenues (à ce stade)
+### 10.15 Sauvegarde sans copie du tampon
+
+- **Où** : `ImageWriter.withCGImage`.
+- **Principe** : le `CGImage` est créé avec
+  `CGDataProvider(dataInfo:data:size:releaseData:)`, qui **partage** le tampon au
+  lieu de le dupliquer (`Data(pixels)` copiait tout).
+- **Pourquoi c'est efficace** : on supprime une copie complète du tampon de sortie
+  (≈ 27 Mo pour une image 4152×6172) à chaque sauvegarde.
+- **Impact** : pic mémoire 109 Mo → **82 Mo** sur `cubic 1big`.
+- **Condition de sûreté** : le `CGImage` ne doit pas survivre à la fermeture ; la
+  fermeture réalise toute l'écriture (`CGImageDestinationFinalize` est synchrone).
+
+### 10.16 Lecture unique du fichier d'entrée
+
+- **Où** : `ImageLoader.canRead`.
+- **Principe** : `canRead` vérifie l'**extension** (peu coûteux) au lieu de lire tout
+  le fichier ; le décodage réel est fait par `load`.
+- **Pourquoi c'est efficace** : le CLI appelait `canRead` (lecture complète du
+  fichier) **puis** `load` (relecture) → le fichier était lu **deux fois**.
+
+### 10.17 Pistes non retenues (à ce stade)
 
 | Piste | Raison |
 | --- | --- |

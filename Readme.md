@@ -106,14 +106,24 @@ Scripts/sanitizers.sh
 ./.build/release/deskew -o sortie.png entree.png
 ./.build/release/deskew -q lanczos -a 10 -o sortie.png entree.png
 ./.build/release/deskew -g d -s sp entree.png     # détection seule + stats
+./.build/release/deskew --version                 # version du port Swift
 ```
 
 Options identiques à l'original (`-o -a -b -q -d -t -m -r -f -p -l -g -s -c`).
 La sortie console (bannière, messages, statistiques, noms de format) reproduit
 celle de Deskew 1.33 : l'outil est utilisable en **remplacement direct**.
 
-> Les tests en mode debug sont lents (cas de stress `cubic` sur une grande image) :
+`--version` (ou `-V`) est une **extension** propre au port Swift : elle affiche
+`deskew-swift <version> — portage Swift de Deskew 1.33` et n'affecte pas la sortie
+par défaut.
+
+> Les tests en mode debug sont lents (traitement d'images sans optimisation) :
 > privilégier `swift test -c release`.
+
+## Signaler un problème
+
+Ouvrir une issue : <https://github.com/Opware2000/deskew-swift/issues>.
+Indiquer la commande, l'image (ou un extrait) et la sortie observée.
 
 ## Utilisation de l'original (rappel)
 

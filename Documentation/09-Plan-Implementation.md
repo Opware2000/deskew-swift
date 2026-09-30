@@ -220,7 +220,8 @@ Livrables :
 
 - ✅ binaire `deskew` **universel** (arm64 + x86_64) via
   `Scripts/build_swift_release.sh` ;
-- ✅ `swift build -c release` reproductible, CI GitHub Actions ;
+- ✅ `swift build -c release` reproductible, CI GitHub Actions (installe **libtiff**
+  pour tester réellement la parité de compression TIFF) ;
 - ✅ README d'installation/usage et parité de la sortie console ;
 - ✅ notes sur les formats supportés (et exclusions) dans `Documentation/04`.
 

@@ -37,6 +37,9 @@ deskew [-o output] [-a angle] [-b color] [..] input
                    can be defined - delimited by commas. Supported specs:
                    jXX - JPEG compression quality, XX in range [1,100(best)]
                    tSCHEME - TIFF compression scheme: none|lzw|rle|deflate|jpeg|g4|input
+
+  Extension (port Swift) :
+    --version, -V  Affiche la version du port et quitte
 ```
 
 ## 2. Options et valeurs par défaut
@@ -241,10 +244,20 @@ Vecteurs de test (`ImageBounds = (0,0,500,1000)`) :
 
 -l  Float sinon 'Invalid value for skip angle parameter: ' + Value
 
--a  Float sinon 'Invalid value for max angle parameter: ' + Value
+-a  Float, **fini** et dans `]0, 90]` (durcissement) sinon 'Invalid value for max angle parameter: ' + Value
 
 paramètre inconnu → 'Unknown parameter: ' + Param
 ```
+
+### Extension du port Swift
+
+| Option | Effet |
+| ------ | ----- |
+| `--version` / `-V` | affiche `deskew-swift <version> — portage Swift de Deskew 1.33` puis quitte (code 0). **Hors parité** : l'original n'a pas cette option. |
+
+> `-p dpi` (override de résolution) est appliqué **à l'entrée et à la sortie** :
+> la résolution effective est utilisée pour la zone de détection **et** écrite dans
+> les métadonnées du fichier produit (corrigé en v0.4.0).
 
 ## 9. Formats d'image forcés et compression
 

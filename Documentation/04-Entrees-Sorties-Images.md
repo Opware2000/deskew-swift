@@ -171,6 +171,9 @@ reproduire exactement `-c tlzw|trle|tdeflate|tjpeg|tg4`, la sortie TIFF passe pa
 | non | repli sur ImageIO : G4 automatique pour le 1 bit ; compression non contrôlée pour les autres schémas |
 
 - **Compression par défaut** (comme l'original) : **1 bit → G4**, sinon **LZW**.
+- **RGBA** : pris en charge (canal alpha non associé, `ExtraSamples`), la compression
+  demandée est donc aussi appliquée aux sorties avec transparence
+  (`-f rgba32 -c tlzw`, etc.).
 - **G4** : libtiff attend `Photometric = WhiteIsZero` (0) ; nos bits valent `1 = blanc`,
   ils sont donc **inversés** avant écriture.
 - libtiff écrit ses diagnostics sur `stderr` ; le shim installe un handler silencieux
