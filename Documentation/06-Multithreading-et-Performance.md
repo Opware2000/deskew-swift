@@ -185,6 +185,12 @@ Scripts/compile_local.sh        # oracle Pascal (une fois)
 Scripts/benchmark.sh 5          # tableau ci-dessus
 ```
 
+> **Re-vérifié après la passe de sécurisation** (`Documentation/11`) : chiffres
+> inchangés. Les gardes de sécurité (validation des arguments, bornes de ressources,
+> erreurs) sont toutes situées **hors des boucles chaudes** (une fois par argument,
+> par rectangle, par détection ou par image) et n'alourdissent donc pas les accès
+> pixel/angle.
+
 
 ## 8. Pièges spécifiques arm64
 
