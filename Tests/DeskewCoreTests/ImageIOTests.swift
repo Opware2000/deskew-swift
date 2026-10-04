@@ -208,6 +208,32 @@ final class ImageIOTests: XCTestCase {
         XCTAssertEqual(compression, 5, "compression LZW attendue")
     }
 
+    /// `input-lossless` (upstream #30) : reprend la compression d'entrée mais
+    /// remplace un JPEG d'entrée par du LZW pour ne pas recompresser avec perte.
+    func testInputLosslessReplacesJpegCompression() throws {
+        let image = PixelImage.gray(GrayImage(width: 16, height: 16, fill: 128))
+
+        func resolve(_ spec: String, input: TiffCompression?) throws -> PipelineResult {
+            var options = DeskewOptions()
+            XCTAssertTrue(options.parse(["-c", spec, "-o", "out.tif", "in.tif"]))
+            return try Pipeline.run(input: image, resolution: .unknown, options: options,
+                                    inputTiffCompression: input)
+        }
+
+        // `input` reprend la compression telle quelle, même JPEG.
+        XCTAssertEqual(try resolve("tinput", input: .jpeg).resolvedTiffCompression, .jpeg)
+        // `input-lossless` remplace JPEG par LZW.
+        let lossless = try resolve("tinput-lossless", input: .jpeg)
+        XCTAssertEqual(lossless.resolvedTiffCompression, .lzw)
+        XCTAssertTrue(lossless.log.contains { $0.hasPrefix("Input TIFF is JPEG-compressed") })
+        // Les schémas déjà sans perte sont repris tels quels.
+        XCTAssertEqual(try resolve("tinput-lossless", input: .deflate).resolvedTiffCompression, .deflate)
+        // Compression d'entrée inconnue : compression par défaut + message.
+        let unknown = try resolve("tinput-lossless", input: nil)
+        XCTAssertNil(unknown.resolvedTiffCompression)
+        XCTAssertTrue(unknown.log.contains { $0.hasPrefix("Could not set TIFF output compression") })
+    }
+
     /// Le DPI forcé (`-p`) doit être appliqué à la **sortie** (issue #1).
     func testDPIOverrideAppliedToOutput() throws {
         var options = DeskewOptions()

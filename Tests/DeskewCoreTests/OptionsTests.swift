@@ -194,7 +194,8 @@ final class OptionsTests: XCTestCase {
         XCTAssertNil(o.tiffCompression)
 
         let tiffs: [(String, TiffCompression)] = [
-            ("g4", .g4), ("rle", .rle), ("input", .input), ("none", .none)
+            ("g4", .g4), ("rle", .rle), ("input", .input),
+            ("input-lossless", .inputLossless), ("none", .none)
         ]
         for (name, expected) in tiffs {
             o = parse(["-c", "t" + name, "in.png"])

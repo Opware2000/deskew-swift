@@ -95,12 +95,25 @@ public enum Pipeline {
                                     resolvedTiffCompression: nil, resolvedOutputFormat: nil,
                                     resolvedResolution: effectiveResolution)
 
-        // Compression TIFF effective (option `input` reprise des métadonnées).
-        let effectiveTiffCompression: TiffCompression?
-        if options.tiffCompression == .input {
+        // Compression TIFF effective : `input`/`input-lossless` reprennent la
+        // compression du fichier d'entrée (résolue depuis ses métadonnées).
+        let ext = FilePath.fileExt(options.outputFileName ?? "").lowercased()
+        let isTiffOutput = ext == "tif" || ext == "tiff"
+        var effectiveTiffCompression = options.tiffCompression
+        if options.tiffCompression == .input || options.tiffCompression == .inputLossless {
             effectiveTiffCompression = inputTiffCompression
-        } else {
-            effectiveTiffCompression = options.tiffCompression
+            if inputTiffCompression == nil {
+                if isTiffOutput {
+                    result.log.append("Could not set TIFF output compression from input, using default.")
+                }
+            } else if options.tiffCompression == .inputLossless,
+                      inputTiffCompression == .jpeg {
+                // Recompresser en JPEG une image déjà JPEG dégraderait encore plus.
+                effectiveTiffCompression = .lzw
+                if isTiffOutput {
+                    result.log.append("Input TIFF is JPEG-compressed, using lossless LZW compression for output instead.")
+                }
+            }
         }
         result.resolvedTiffCompression = effectiveTiffCompression
 

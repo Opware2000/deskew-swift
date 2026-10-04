@@ -15,7 +15,7 @@ algorithmes** (parité des résultats) tout en profitant de :
 
 | Inclus dans la réimplémentation | Exclu (hors périmètre v1) |
 | ------------------------------- | ------------------------- |
-| Détection d'inclinaison (transformée de Hough) | Interface graphique (non portée) |
+| Détection d'inclinaison (transformée de Hough) | Interface graphique (non portée en v1 ; voir [10](10-Interface-Graphique.md)) |
 | Seuillage automatique (Otsu) et binarisation | Bibliothèque Vampyre Imaging (`Imaging/`) réécrite telle quelle |
 | Rotation d'image + rééchantillonnage (nearest/linear/cubic/lanczos) | Codecs tiers embarqués (ZLib, JPEG, LibTIFF, JNG, QOI…) |
 | Analyse de la ligne de commande | Formats propriétaires exotiques (DDS, TGA, PPM, PGM, PAM, PFM, JNG, PSD) |
@@ -35,6 +35,7 @@ algorithmes** (parité des résultats) tout en profitant de :
 | [07-Parite-et-Tests.md](07-Parite-et-Tests.md) | Risques de parité numérique, golden tests, plan de tests |
 | [08-Matrice-de-Tracabilite.md](08-Matrice-de-Tracabilite.md) | Table exhaustive fonction/procédure Pascal → symbole Swift |
 | [09-Plan-Implementation.md](09-Plan-Implementation.md) | Découpage en phases, ordre de travail, critères de sortie |
+| [10-Interface-Graphique.md](10-Interface-Graphique.md) | Note de conception (ADR) : GUI macOS optionnelle, UX inspirée de la GUI Pascal |
 | [11-Securite.md](11-Securite.md) | Analyse de sécurité : constats, correctifs, tests de non-régression |
 
 ## Sources de vérité (code analysé)

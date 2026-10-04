@@ -13,6 +13,11 @@ Toutes les évolutions notables de **deskew-swift**, la réimplémentation en Sw
 
 ### 🔧 Améliorations
 
+- **Nouvelle valeur de compression `-c tinput-lossless`** : comme `tinput`, mais
+  reprend la compression du fichier d'entrée **sans perte** — un TIFF d'entrée
+  compressé en JPEG est réécrit en LZW au lieu d'être recompressé en JPEG (évite
+  une dégradation supplémentaire). Portage de la demande upstream #30.
+
 - **Installation Homebrew simplifiée** :
   `brew install Opware2000/tap/deskew-swift`. La formule vit désormais dans un
   **tap** dédié ([`Opware2000/homebrew-tap`](https://github.com/Opware2000/homebrew-tap)) —
@@ -22,6 +27,8 @@ Toutes les évolutions notables de **deskew-swift**, la réimplémentation en Sw
 
 - Documentation corrigée (références obsolètes à `swift-argument-parser`, à une
   signature d'API inexacte et à `Accelerate`).
+- Nouvelle note de conception sur une **GUI macOS optionnelle** (UX inspirée de la
+  GUI Pascal, appel direct au cœur Swift) : [`Documentation/10-Interface-Graphique.md`](Documentation/10-Interface-Graphique.md).
 - Nouveau test pour `--version` / `-V` ; l'image de stress est exclue des tests en
   mode debug (exécutée en release et en intégration continue).
 - **Nettoyage du dépôt** : suppression des artefacts binaires Windows

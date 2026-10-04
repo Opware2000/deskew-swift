@@ -170,7 +170,7 @@ Légende cible :
 
 | Élément | Raison |
 | ------- | ------ |
-| Interface graphique (`Gui/` Pascal) | retirée du dépôt (upstream uniquement) |
+| Interface graphique (`Gui/` Pascal) | retirée du dépôt (upstream uniquement) ; GUI Swift optionnelle, voir [10](10-Interface-Graphique.md) |
 | `Imaging/JpegLib/*`, `Imaging/ZLib/*` | codecs remplacés par ImageIO |
 | `Imaging/LibTiff/*` | remplacé par ImageIO pour TIFF |
 | `Imaging/ImagingWic.pas`, `ImagingQuartz.pas` | spécifique plateforme, remplacé |

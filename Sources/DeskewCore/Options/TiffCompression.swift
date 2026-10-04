@@ -15,9 +15,11 @@ public enum TiffCompression: String, CaseIterable, Equatable, Sendable {
     case g4
     /// Reprendre la compression du fichier d'entrée.
     case input
+    /// Comme `input`, mais jamais avec perte : un JPEG d'entrée est écrit en LZW.
+    case inputLossless = "input-lossless"
 
     /// Valeur du tag TIFF `Compression` correspondant, si définie indépendamment
-    /// de l'entrée. `nil` pour `input` (résolu à partir des métadonnées).
+    /// de l'entrée. `nil` pour `input`/`input-lossless` (résolus à partir des métadonnées).
     public var tiffTagValue: Int? {
         switch self {
         case .none: return 1
@@ -26,7 +28,7 @@ public enum TiffCompression: String, CaseIterable, Equatable, Sendable {
         case .deflate: return 8
         case .jpeg: return 7
         case .g4: return 4
-        case .input: return nil
+        case .input, .inputLossless: return nil
         }
     }
 
@@ -37,6 +39,7 @@ public enum TiffCompression: String, CaseIterable, Equatable, Sendable {
         case "LZW": return .lzw
         case "JPEG": return .jpeg
         case "Deflate": return .deflate
+        case "Packbits RLE": return .rle
         case "CCITT Group 4 Fax", "CCITT": return .g4
         default: return nil
         }

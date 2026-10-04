@@ -204,7 +204,7 @@ public enum TiffWriter {
         case .deflate: return Compression.deflate
         case .jpeg: return Compression.jpeg
         case .g4: return Compression.g4
-        case .input: return Compression.none
+        case .input, .inputLossless: return Compression.none
         }
     }
 }

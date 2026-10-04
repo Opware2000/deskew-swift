@@ -160,8 +160,8 @@ Reproduire les commandes de `Bin/runtests.sh` :
 -f rgba32 -b 40ff00ff
 -f g8 -b 77 -s t
 -g d                              (detect-only, aucun fichier)
-TIFF : -t a -a 5 ; -b DD -c j95,tjpeg ; -t 128 -c tinput ; -b FF0000 -c tdeflate ;
-       -f b1 ; -a 5 -l 2
+TIFF : -t a -a 5 ; -b DD -c j95,tjpeg ; -t 128 -c tinput ; -c tinput-lossless ;
+       -b FF0000 -c tdeflate ; -f b1 ; -a 5 -l 2
 ```
 
 Vérifier pour chacune : code de sortie, absence de fichier en detect-only, existence et

@@ -110,7 +110,7 @@ flowchart TD
 | `ImagingTypes.pas` (couleurs, formats) | `DeskewCore.Pixel` (`GrayImage`, `RGBImage`, `RGBAImage`) | Types |
 | `Imaging.pas` (I/O, métadonnées) | `DeskewImageIO` (ImageIO/CoreGraphics) | Entrées-sorties |
 | `ImagingFormats.pas` (filtres) | `DeskewCore.Resampling` | Algorithme pur |
-| `Gui/` (interface graphique Pascal) | *(retiré du dépôt — upstream uniquement)* | — |
+| `Gui/` (interface graphique Pascal) | *(retiré du dépôt — upstream uniquement ; GUI Swift optionnelle : [10](10-Interface-Graphique.md))* | — |
 
 ## 5. Dépendances entre modules (sens des appels)
 

@@ -35,7 +35,8 @@ func writeUsage() {
         -l angle:      Skip deskewing step if skew angle is smaller (default: 0.01)
         -g flags:      Operational flags: c - crop to input size, d - detect only
         -s info:       Info dump: s - stats, p - params, t - timings, w - save work image
-        -c specs:      Output compression specs (jXX JPEG quality, tSCHEME TIFF scheme)
+        -c specs:      Output compression specs (jXX JPEG quality, tSCHEME TIFF scheme:
+                       none|lzw|rle|deflate|jpeg|g4|input|input-lossless)
     """)
 }
 
