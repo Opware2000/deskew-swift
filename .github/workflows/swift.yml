@@ -12,7 +12,7 @@ jobs:
     # Runner arm64 (Apple Silicon)
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Version de Swift
         run: swift --version
@@ -33,7 +33,7 @@ jobs:
     # code parallèle et les E/S d'images.
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Sanitizers (TSan + ASan)
         run: Scripts/sanitizers.sh
