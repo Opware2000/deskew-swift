@@ -1,5 +1,7 @@
 # Deskew Swift
 
+[![Swift](https://github.com/Opware2000/deskew-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/Opware2000/deskew-swift/actions/workflows/swift.yml)
+
 Réimplémentation en **Swift** de [**Deskew**](https://github.com/galfar/deskew), l'outil
 en ligne de commande qui redresse automatiquement (deskew) les documents numérisés.
 
