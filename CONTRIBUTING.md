@@ -95,10 +95,16 @@ Scopes recommandés : `core`, `options`, `rotation`, `skew`, `io`, `pipeline`, `
 
 ## Workflow
 
-1. Créer une branche (`feat/…`, `fix/…`).
-2. `xcrun swift test -c release` doit passer (58 tests).
+`master` est **protégée** (ruleset GitHub) : le push direct est refusé, et le merge
+exige les checks CI `build-and-test` **et** `sanitizers` verts, branche à jour. Le
+flux est donc obligatoirement branche → PR :
+
+1. Créer une branche (`feat/…`, `fix/…`, `docs/…`).
+2. `xcrun swift test -c release` doit passer (86 tests, 6 skippés).
 3. Commits atomiques (un commit = une idée), message conforme ci-dessus.
 4. Ouvrir une pull request en décrivant le « pourquoi » et l'impact sur la parité.
+5. Attendre les deux checks CI verts (`gh pr checks --watch`), puis merger
+   (`gh pr merge --squash --delete-branch`).
 
 ## Signaler un problème de parité
 
