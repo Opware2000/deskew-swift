@@ -370,26 +370,34 @@ public struct DeskewOptions: Equatable, Sendable {
                    contentSizeUnit.rawValue
         }
 
-        return "Parameters: " + cmdParams + "\n" +
-            "  input file          = " + (inputFileName ?? "") + "\n" +
-            "  output file         = " + (outputFileName ?? "") + "\n" +
-            "  background color    = " + PascalFormat.hex8(backgroundColor.color32) + "\n" +
-            "  resampling filter   = " + filterStr + "\n" +
-            "  max angle           = " + PascalFormat.floatToStr(maxAngle) + "\n" +
-            "  angle step          = " + PascalFormat.floatToStr(angleStep) + "\n" +
-            "  thresholding method = " + (thresholdingMethod == .explicit ? "explicit" : "auto otsu") + "\n" +
-            "  threshold level     = " + String(thresholdLevel) + "\n" +
-            "  content rect        = " + rectToStr(contentRect) + "\n" +
-            "  content margins     = " + rectToStr(contentMargins) + "\n" +
-            "  output format       = " + (forcedOutputFormat?.name ?? "default") + "\n" +
-            "  skip angle          = " + PascalFormat.floatToStr(skipAngle) + "\n" +
-            "  dpi override        = " + String(dpiOverride) + "\n" +
-            "  oper flags          = " + (cropToInput ? "crop-to-input " : "") +
-                                            (detectOnly ? "detect-only " : "") + "\n" +
-            "  info flags          = " + (showParams ? "params " : "") +
-                                            (showDetectionStats ? "detection-stats " : "") +
-                                            (showTimings ? "timings " : "") +
-                                            (saveWorkImage ? "save-work-image " : "") + "\n" +
-            "  output compression  = jpeg:" + compJpeg + " tiff:" + compTiff + "\n"
+        let operFlags = (cropToInput ? "crop-to-input " : "") +
+                        (detectOnly ? "detect-only " : "")
+        let infoFlags = (showParams ? "params " : "") +
+                        (showDetectionStats ? "detection-stats " : "") +
+                        (showTimings ? "timings " : "") +
+                        (saveWorkImage ? "save-work-image " : "")
+
+        // Une ligne par élément : évite une unique concaténation géante que le
+        // vérificateur de types met trop longtemps à résoudre sur d'anciens Swift.
+        let lines = [
+            "Parameters: " + cmdParams,
+            "  input file          = " + (inputFileName ?? ""),
+            "  output file         = " + (outputFileName ?? ""),
+            "  background color    = " + PascalFormat.hex8(backgroundColor.color32),
+            "  resampling filter   = " + filterStr,
+            "  max angle           = " + PascalFormat.floatToStr(maxAngle),
+            "  angle step          = " + PascalFormat.floatToStr(angleStep),
+            "  thresholding method = " + (thresholdingMethod == .explicit ? "explicit" : "auto otsu"),
+            "  threshold level     = " + String(thresholdLevel),
+            "  content rect        = " + rectToStr(contentRect),
+            "  content margins     = " + rectToStr(contentMargins),
+            "  output format       = " + (forcedOutputFormat?.name ?? "default"),
+            "  skip angle          = " + PascalFormat.floatToStr(skipAngle),
+            "  dpi override        = " + String(dpiOverride),
+            "  oper flags          = " + operFlags,
+            "  info flags          = " + infoFlags,
+            "  output compression  = jpeg:" + compJpeg + " tiff:" + compTiff
+        ]
+        return lines.joined(separator: "\n") + "\n"
     }
 }
